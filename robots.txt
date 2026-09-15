@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /payment.html
+Disallow: /intake-form.html
+Sitemap: https://iahmedsaeed.com/sitemap.xml

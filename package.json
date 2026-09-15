@@ -1,0 +1,9 @@
+{
+  "name": "iahmedsaeed-pdf",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@sparticuz/chromium": "^140.0.0",
+    "puppeteer-core": "^23.11.1"
+  }
+}

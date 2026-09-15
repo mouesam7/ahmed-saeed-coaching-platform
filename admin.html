@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Ahmed Saeed</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="admin-build" content="20260831-mobile2">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0C0F;--bg-2:#0F1318;--surface:#141A20;--surface-2:#1A222B;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.14);
+  --ink:#EDF1F4;--ink-2:#AEB7C0;--ink-3:#6D7883;--accent:#4FD1C5;--accent-2:#7DE8DE;--danger:#E5646E;--ok:#4FD1C5;--warn:#E8B84C;
+  --radius:14px;--ff-display:'Sora',sans-serif;--ff-body:'Inter',sans-serif;--ff-mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
+body{max-width:100%;overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--ff-body);-webkit-font-smoothing:antialiased}
+.disp{font-family:var(--ff-display)}
+input,select,textarea,button{font-family:inherit}
+
+/* LOGIN */
+.login{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:200;padding:24px}
+.login-box{width:100%;max-width:380px;text-align:center}
+.login-box .mark{width:54px;height:54px;border-radius:15px;background:linear-gradient(150deg,var(--accent),#0E3B37);color:#04201D;display:grid;place-items:center;font-weight:800;font-size:22px;margin:0 auto 20px;font-family:var(--ff-display)}
+.login-box h1{font-family:var(--ff-display);font-size:24px;font-weight:800;margin-bottom:6px}
+.login-box p{color:var(--ink-3);font-size:14px;margin-bottom:26px}
+.login-box input{width:100%;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:14px 16px;color:var(--ink);font-size:15px;margin-bottom:14px}
+.login-box input:focus{outline:none;border-color:var(--accent)}
+.login-box button{width:100%;padding:14px;border-radius:100px;border:none;background:var(--accent);color:#04201D;font-family:var(--ff-display);font-weight:700;font-size:15px;cursor:pointer}
+.login-err{color:var(--danger);font-size:13px;margin-top:10px;min-height:18px}
+
+/* LAYOUT */
+.app{display:none;grid-template-columns:250px 1fr;min-height:100vh}
+.app.show{display:grid}
+.side{background:var(--bg-2);border-right:1px solid var(--line);padding:24px 16px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side .brand{display:flex;align-items:center;gap:11px;padding:0 8px 24px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.side .brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--accent),#0E3B37);color:#04201D;display:grid;place-items:center;font-weight:800;font-family:var(--ff-display)}
+.side .brand .t{font-family:var(--ff-display);font-weight:700;font-size:15px}
+.side .brand .s{font-size:11px;color:var(--ink-3);font-family:var(--ff-mono)}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;color:var(--ink-2);cursor:pointer;font-size:14.5px;font-weight:500;margin-bottom:4px;transition:.15s}
+.nav-item:hover{background:var(--surface);color:var(--ink)}
+.nav-item.active{background:rgba(79,209,197,.1);color:var(--accent)}
+.nav-item svg{flex-shrink:0}
+.nav-item .badge{margin-inline-start:auto;background:var(--accent);color:#04201D;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;font-family:var(--ff-mono)}
+.logout{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+
+.main{padding:32px 36px;overflow-x:hidden}
+.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px}
+.page-head h1{font-family:var(--ff-display);font-size:26px;font-weight:800}
+.page-head p{color:var(--ink-3);font-size:14px;margin-top:3px}
+.view{display:none}.view.active{display:block}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.stat .l{font-size:12.5px;color:var(--ink-3);font-family:var(--ff-mono);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+.stat .n{font-family:var(--ff-display);font-size:30px;font-weight:800}
+.stat .n.acc{color:var(--accent)}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:200px;position:relative}
+.search input{width:100%;background:var(--surface);border:1px solid var(--line-2);border-radius:11px;padding:11px 14px 11px 40px;color:var(--ink);font-size:14px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.search input:focus{outline:none;border-color:var(--accent)}
+.filter-tabs{display:flex;gap:6px;background:var(--surface);padding:4px;border-radius:11px;border:1px solid var(--line)}
+.filter-tabs button{padding:8px 14px;border:none;background:transparent;color:var(--ink-2);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
+.filter-tabs button.active{background:var(--surface-2);color:var(--accent)}
+
+/* TABLE */
+.tbl-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-family:var(--ff-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:14px 18px;border-bottom:1px solid var(--line);font-weight:500}
+td{padding:15px 18px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:100px;font-size:12px;font-weight:600;font-family:var(--ff-mono)}
+.pill.pending{background:rgba(232,184,76,.12);color:var(--warn)}
+.pill.approved{background:rgba(79,209,197,.12);color:var(--ok)}
+.pill.rejected{background:rgba(229,100,110,.12);color:var(--danger)}
+.pill.new{background:rgba(125,232,222,.12);color:var(--accent-2)}
+.pill.region{background:var(--surface-2);color:var(--ink-2)}
+.tbl-actions{display:flex;gap:8px}
+.icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-btn.ok:hover{border-color:var(--ok);color:var(--ok)}
+.icon-btn.warn:hover{border-color:var(--warn);color:var(--warn)}
+.icon-btn.no:hover{border-color:var(--danger);color:var(--danger)}
+.icon-btn.wa:hover{border-color:#25D366;color:#25D366}
+.empty{text-align:center;padding:60px 20px;color:var(--ink-3)}
+.empty svg{margin-bottom:14px;opacity:.5}
+
+/* BUTTONS */
+.btn{padding:11px 20px;border-radius:100px;border:none;font-family:var(--ff-display);font-weight:600;font-size:14px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--accent);color:#04201D}
+.btn-primary:hover{background:var(--accent-2)}
+.btn-ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line-2)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:8px 15px;font-size:13px}
+
+/* CARDS GRID (plans / results / reviews) */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.pcard h3{font-family:var(--ff-display);font-size:17px;font-weight:700;margin-bottom:4px}
+.pcard .rk{font-family:var(--ff-mono);font-size:11px;color:var(--ink-3);margin-bottom:16px}
+.pcard .pr-field{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}
+.pcard .pr-field label{font-size:13px;color:var(--ink-2)}
+.pcard .pr-field input{width:100px;background:var(--bg);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;color:var(--ink);font-family:var(--ff-mono);font-size:13px;text-align:right}
+.pcard .pr-field input:focus{outline:none;border-color:var(--accent)}
+
+.media-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;position:relative}
+.media-card img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block}
+.media-card .del{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:8px;background:rgba(10,12,15,.8);border:1px solid var(--line-2);color:var(--danger);cursor:pointer;display:grid;place-items:center}
+.media-card .del:hover{background:var(--danger);color:#fff}
+.tf-slot{border:1.5px dashed var(--line-2);border-radius:12px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-3);transition:.2s;position:relative;overflow:hidden}
+/* interactive cropper */
+.tf-col-lbl{font-family:var(--ff-mono);font-size:11px;letter-spacing:.1em;color:var(--accent-2);margin-bottom:8px}
+.cropper{position:relative;width:100%;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--bg);border:1px solid var(--line-2)}
+.cropper-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:var(--ink-3);transition:.2s;z-index:2}
+.cropper-empty:hover{color:var(--accent)}
+.cropper-empty span{font-size:12.5px}
+.cropper[data-empty="0"] .cropper-empty{display:none}
+.crop-canvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none;display:none}
+.cropper[data-empty="0"] .crop-canvas{display:block}
+.crop-canvas:active{cursor:grabbing}
+.zoom{width:100%;margin-top:10px;accent-color:var(--accent);cursor:pointer}
+.tf-change{width:100%;margin-top:6px;background:transparent;border:1px solid var(--line-2);color:var(--ink-2);border-radius:9px;padding:7px;font-size:12.5px;cursor:pointer;transition:.2s}
+.tf-change:hover{border-color:var(--accent);color:var(--accent)}
+.tf-slot:hover{border-color:var(--accent);color:var(--accent)}
+.tf-slot.has{border-style:solid;border-color:var(--accent)}
+.tf-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tf-slot .tf-lbl{font-family:var(--ff-mono);font-size:11px;letter-spacing:.1em;margin-top:8px;z-index:2}
+.tf-slot.has .tf-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(10,12,15,.82);padding:5px;margin:0;text-align:center}
+.tf-slot.has svg{display:none}
+/* before/after media card on grid */
+.ba-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;position:relative}
+.ba-imgs{display:grid;grid-template-columns:1fr 1fr}
+.ba-imgs figure{margin:0;position:relative}
+.ba-imgs img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block}
+.ba-imgs figcaption{position:absolute;top:8px;left:8px;font-family:var(--ff-mono);font-size:10px;letter-spacing:.08em;background:rgba(10,12,15,.8);padding:3px 8px;border-radius:100px;color:var(--accent-2)}
+.ba-card .del{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:8px;background:rgba(10,12,15,.85);border:1px solid var(--line-2);color:var(--danger);cursor:pointer;display:grid;place-items:center;z-index:3}
+.ba-card .del:hover{background:var(--danger);color:#fff}
+.add-media{border:1.5px dashed var(--line-2);border-radius:var(--radius);min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-3);transition:.2s}
+.add-media:hover{border-color:var(--accent);color:var(--accent)}
+
+/* FORM CARD */
+.form-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;max-width:520px}
+.form-card .fld{margin-bottom:16px}
+.form-card label{display:block;font-size:13px;color:var(--ink-2);margin-bottom:7px}
+.form-card input,.form-card select{width:100%;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;color:var(--ink);font-size:14px}
+.form-card input:focus,.form-card select:focus{outline:none;border-color:var(--accent)}
+.fld.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(5,6,8,.7);backdrop-filter:blur(6px);z-index:150;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.modal.show{display:flex}
+.modal-box{background:var(--bg-2);border:1px solid var(--line-2);border-radius:18px;max-width:720px;width:100%;padding:28px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-head h2{font-family:var(--ff-display);font-size:22px;font-weight:800}
+.modal-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);cursor:pointer;display:grid;place-items:center}
+.modal-close:hover{color:var(--danger);border-color:var(--danger)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px;margin-bottom:22px}
+.status-bar{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:22px}
+.status-bar .sb-label{font-family:var(--ff-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:11px}
+.status-bar .sb-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sb-btn{flex:1;min-width:90px;padding:11px 14px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);border-radius:10px;font-family:var(--ff-display);font-weight:600;font-size:13.5px;cursor:pointer;transition:.2s}
+.sb-btn:hover{border-color:var(--accent);color:var(--ink)}
+.sb-btn.active{background:var(--accent);color:#04201D;border-color:var(--accent)}
+.detail{border-bottom:1px solid var(--line);padding-bottom:10px}
+.detail .k{font-family:var(--ff-mono);font-size:11px;color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.detail .v{font-size:14.5px}
+.detail.full{grid-column:1/-1}
+.photos-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.photos-row a{border-radius:12px;overflow:hidden;border:1px solid var(--line);display:block}
+.photos-row img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block}
+.modal-actions{display:flex;gap:12px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface-2);border:1px solid var(--line-2);color:var(--ink);padding:13px 22px;border-radius:100px;font-size:14px;z-index:300;opacity:0;transition:.3s;box-shadow:0 12px 40px -10px rgba(0,0,0,.6)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--ok)}.toast.err{border-color:var(--danger)}
+
+@media(max-width:860px){
+  .app.show{grid-template-columns:1fr}
+  .side{position:fixed;left:-260px;z-index:120;transition:.3s;width:250px}
+  .side.open{left:0}
+  .main{padding:22px 18px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .menu-fab{display:grid !important}
+  table{font-size:13px}
+  th,td{padding:11px 12px}
+  .settings-grid{grid-template-columns:1fr !important}
+  .codes-layout{grid-template-columns:1fr !important}
+}
+.menu-fab{display:none;position:fixed;bottom:22px;left:22px;z-index:130;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#04201D;border:none;place-items:center;cursor:pointer;box-shadow:0 10px 30px -8px rgba(79,209,197,.5)}
+
+/* ===== PROGRAMS (Diet + Workout builder) ===== */
+.pb-tabs{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+.pb-tab{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--ink-3);font-family:var(--ff-display);font-weight:600;font-size:15px;padding:11px 18px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px;margin-bottom:-1px}
+.pb-tab:hover{color:var(--ink)}
+.pb-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.pb-tab svg{width:17px;height:17px}
+.pb-view{display:none}.pb-view.active{display:block}
+.pb-grid{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}
+@media(max-width:1100px){.pb-grid{grid-template-columns:1fr}}
+.pb-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.pb-card-h{font-family:var(--ff-mono);font-size:11px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.pb-row2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.pb-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.pb-row4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+@media(max-width:560px){.pb-row2,.pb-row3,.pb-row4{grid-template-columns:1fr}}
+.pb-fld label{display:block;font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.pb-fld input,.pb-fld select,.pb-fld textarea{width:100%;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;color:var(--ink);font-size:14px;font-family:var(--ff-body)}
+.pb-fld input:focus,.pb-fld select:focus,.pb-fld textarea:focus{outline:none;border-color:var(--accent)}
+.pb-fld textarea{min-height:110px;resize:vertical;line-height:1.8}
+
+/* meal / day block */
+.pb-block{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.pb-block-head{display:flex;align-items:center;gap:11px;padding:14px 16px;background:var(--bg-2);border-bottom:1px solid var(--line)}
+.pb-num{width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(79,209,197,.12);border:1px solid rgba(79,209,197,.25);display:grid;place-items:center;font-family:var(--ff-mono);font-weight:600;color:var(--accent);font-size:13px}
+.pb-name{background:transparent;border:none;color:var(--ink);font-family:var(--ff-display);font-weight:700;font-size:16px;flex:1;min-width:60px;padding:4px}
+.pb-name:focus{outline:none;background:var(--bg);border-radius:6px}
+.pb-meta{font-family:var(--ff-mono);font-size:12px;color:var(--accent);font-weight:600;white-space:nowrap;direction:ltr;unicode-bidi:isolate}
+.pb-latin{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.pb-x{background:transparent;border:none;cursor:pointer;color:var(--ink-3);width:30px;height:30px;border-radius:8px;display:grid;place-items:center;transition:.15s;flex-shrink:0}
+.pb-x:hover{background:var(--surface-2);color:var(--danger)}
+.pb-x svg{width:15px;height:15px}
+.pb-inner{padding:8px 12px 14px}
+
+/* diet item rows */
+.pb-drow{display:grid;grid-template-columns:1.5fr 70px repeat(4,52px) 28px;gap:7px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
+.pb-drow.h span{font-size:10px;color:var(--ink-3);font-family:var(--ff-mono);text-align:center;text-transform:uppercase}
+.pb-drow.h span:first-child{text-align:right;padding-right:4px}
+.pb-drow:last-child{border-bottom:none}
+.pb-sel,.pb-q{background:var(--bg);border:1px solid var(--line-2);border-radius:8px;padding:8px;color:var(--ink);font-size:13px;width:100%;font-family:var(--ff-body)}
+.pb-q{font-family:var(--ff-mono);text-align:center}
+.pb-sel:focus,.pb-q:focus{outline:none;border-color:var(--accent)}
+.pb-mc{text-align:center;font-family:var(--ff-mono);font-size:12px;color:var(--ink)}
+.pb-mc.cal{color:var(--accent);font-weight:600}
+@media(max-width:720px){
+  .pb-drow{grid-template-columns:1fr 56px;gap:6px 8px;padding:11px 4px}
+  .pb-drow.h{display:none}
+  .pb-mc{display:flex!important;justify-content:space-between;font-size:12px}
+  .pb-mc::before{content:attr(data-l);color:var(--ink-3);font-family:var(--ff-mono);font-size:10px}
+}
+/* alternatives (manual) */
+.pb-alts{grid-column:1/-1;padding:4px 2px 2px}
+.pb-alt-add{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pb-alt-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:var(--ff-mono);color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line-2);border-radius:7px;padding:4px 8px}
+.pb-alt-chip b{color:var(--accent-2);font-weight:500}
+.pb-alt-chip .rm{cursor:pointer;color:var(--ink-3);font-weight:700}
+.pb-alt-chip .rm:hover{color:var(--danger)}
+.pb-alt-btn{font-size:12px;font-family:var(--ff-body);color:var(--accent);background:transparent;border:1px dashed var(--line-2);border-radius:7px;padding:4px 10px;cursor:pointer}
+.pb-alt-btn:hover{border-color:var(--accent)}
+
+/* workout rows */
+.pb-wrow{display:grid;grid-template-columns:1.7fr 42px 56px 42px 1.2fr 28px;gap:7px;align-items:start;padding:8px 4px;border-bottom:1px solid var(--line)}
+.pb-wrow.h span{font-size:10px;color:var(--ink-3);font-family:var(--ff-mono);text-align:center;text-transform:uppercase}
+.pb-wrow.h span:first-child{text-align:right;padding-right:4px}
+.pb-wrow:last-child{border-bottom:none}
+.pb-wi{background:var(--bg);border:1px solid var(--line-2);border-radius:8px;padding:8px;color:var(--ink);font-size:13px;width:100%;font-family:var(--ff-body)}
+.pb-wi.c{text-align:center;font-family:var(--ff-mono)}
+.pb-wi:focus{outline:none;border-color:var(--accent)}
+.pb-wlbl{display:none}
+@media(max-width:720px){
+  .pb-wrow{grid-template-columns:1fr 1fr;gap:6px 8px;padding:11px 4px}
+  .pb-wrow.h{display:none}
+  .pb-wlbl{display:block;font-size:10px;color:var(--ink-3);font-family:var(--ff-mono);margin-bottom:2px}
+}
+.pb-exwrap{position:relative}
+.pb-exsug{position:absolute;top:100%;right:0;left:0;z-index:20;background:var(--surface-2);border:1px solid var(--line-2);border-radius:10px;margin-top:4px;max-height:200px;overflow:auto;box-shadow:0 12px 30px rgba(0,0,0,.4);display:none}
+.pb-exsug.show{display:block}
+.pb-exsug-item{padding:9px 12px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line)}
+.pb-exsug-item:hover{background:var(--surface)}
+.pb-exsug-item .lnk{font-family:var(--ff-mono);font-size:10px;color:var(--accent)}
+.pb-exsug-item .del{color:var(--ink-3);cursor:pointer}.pb-exsug-item .del:hover{color:var(--danger)}
+.pb-exsug-empty{padding:10px 12px;color:var(--ink-3);font-size:12px}
+.pb-savechip{font-size:11px;font-family:var(--ff-mono);color:var(--accent);cursor:pointer;white-space:nowrap;border:1px solid rgba(79,209,197,.3);border-radius:6px;padding:3px 7px;margin-top:5px;display:inline-block}
+.pb-savechip:hover{background:rgba(79,209,197,.08)}
+
+.pb-add{width:100%;margin-top:10px;background:transparent;border:1px dashed var(--line-2);color:var(--accent);padding:9px;border-radius:10px;cursor:pointer;font-weight:600;font-size:13px;font-family:var(--ff-body)}
+.pb-add:hover{background:rgba(79,209,197,.05)}
+.pb-add-block{width:100%;background:var(--surface);border:1px dashed var(--line-2);color:var(--accent);padding:14px;border-radius:var(--radius);cursor:pointer;font-weight:600;font-size:15px;font-family:var(--ff-display);display:flex;align-items:center;justify-content:center;gap:9px}
+.pb-add-block:hover{background:rgba(79,209,197,.05);border-color:var(--accent)}
+.pb-add-block svg{width:19px;height:19px}
+
+/* sidebar totals */
+.pb-side{position:sticky;top:20px}
+@media(max-width:1100px){.pb-side{position:static}}
+.pb-totals{background:linear-gradient(160deg,var(--surface),var(--bg-2));border:1px solid rgba(79,209,197,.2);border-radius:var(--radius);overflow:hidden}
+.pb-totals-h{padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.pb-totals-h .e{font-family:var(--ff-mono);font-size:11px;color:var(--accent);letter-spacing:1px}
+.pb-totals-h h3{font-family:var(--ff-display);font-size:16px;font-weight:800;margin-top:2px}
+.pb-bigcal{padding:20px;text-align:center;border-bottom:1px solid var(--line)}
+.pb-bigcal .n{font-family:var(--ff-display);font-weight:800;font-size:42px;color:var(--accent);line-height:1;letter-spacing:-2px}
+.pb-bigcal .l{font-family:var(--ff-mono);font-size:12px;color:var(--ink-3);margin-top:6px;letter-spacing:1px}
+.pb-mg{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+.pb-mb{background:var(--surface);padding:14px 6px;text-align:center}
+.pb-mb .n{font-family:var(--ff-display);font-weight:700;font-size:20px}
+.pb-mb .l{font-size:12px;color:var(--ink-3);margin-top:2px}
+.pb-mb.p .n{color:#5FA8FF}.pb-mb.c .n{color:var(--warn)}.pb-mb.f .n{color:#E8845C}
+.pb-tw{padding:14px 18px 16px}
+.pb-tr{display:flex;justify-content:space-between;font-size:13px;padding:5px 0}
+.pb-tr span{color:var(--ink-3)}.pb-tr b{font-family:var(--ff-mono)}
+.pb-bar{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;margin-top:4px}
+.pb-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px}
+.pb-bar.over>i{background:linear-gradient(90deg,var(--warn),var(--danger))}
+.pb-wsum{padding:14px 18px}
+.pb-wsr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pb-wsr:last-child{border:none}.pb-wsr span{color:var(--ink-3)}.pb-wsr b{font-family:var(--ff-mono);color:var(--accent)}
+
+/* lang toggle + actions */
+.pb-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.pb-langseg{display:flex;background:var(--surface);border:1px solid var(--line-2);border-radius:100px;padding:3px}
+.pb-langseg button{border:none;background:transparent;color:var(--ink-2);font-family:var(--ff-body);font-size:13px;font-weight:600;padding:7px 16px;border-radius:100px;cursor:pointer}
+.pb-langseg button.active{background:var(--accent);color:#04201D}
+.pb-empty{color:var(--ink-3);font-size:13px;text-align:center;padding:12px}
+.pb-src-note{font-size:12px;color:var(--ink-3);margin-top:12px;line-height:1.7}
+.pb-src-note b{color:var(--ink-2)}
+.pb-custom-tag{font-family:var(--ff-mono);font-size:9px;color:var(--warn);border:1px solid rgba(232,184,76,.3);border-radius:4px;padding:1px 5px;margin-left:6px}
+.pb-flist{margin-top:6px;max-height:340px;overflow:auto;padding-left:4px}
+.pb-fcat{font-family:var(--ff-mono);font-size:11px;color:var(--accent);letter-spacing:1px;margin:14px 0 6px;text-transform:uppercase}
+.pb-fitem{display:grid;grid-template-columns:1.6fr repeat(4,1fr) 28px;gap:8px;align-items:center;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:9px;margin-bottom:5px;font-size:13px}
+.pb-fitem .fn{font-weight:600}
+.pb-fitem .fv{font-family:var(--ff-mono);color:var(--ink-3);text-align:center;font-size:12px}
+.pb-fsrc{font-family:var(--ff-mono);font-size:10px;color:var(--ink-3)}
+
+</style>
+<link rel="stylesheet" href="ui-system.css?v=20260831-mobile2">
+<style id="admin-responsive-guard">
+/* Keep the protected app hidden until Supabase confirms a valid session. */
+.page-admin .app:not(.show){display:none!important}
+@media(max-width:860px){
+  body.page-admin{min-width:0!important;overflow-x:hidden!important}
+  body.page-admin.admin-menu-open{overflow:hidden!important}
+  .page-admin .app.show{display:block!important;width:100%!important;min-width:0!important;min-height:100dvh!important}
+  .page-admin .side{
+    position:fixed!important;inset:0 auto 0 0!important;left:0!important;width:min(86vw,300px)!important;
+    height:100dvh!important;min-height:0!important;overflow-y:auto!important;z-index:170!important;
+    transform:translate3d(-105%,0,0)!important;visibility:hidden!important;
+    transition:transform .28s cubic-bezier(.22,.7,.25,1),visibility .28s!important
+  }
+  .page-admin .side.open{transform:translate3d(0,0,0)!important;visibility:visible!important}
+  .page-admin .side-scrim{display:block!important;position:fixed!important;inset:0!important;z-index:160!important;background:rgba(0,0,0,.62)!important;opacity:0;visibility:hidden;transition:.25s}
+  .page-admin .side-scrim.open{opacity:1!important;visibility:visible!important}
+  .page-admin main,.page-admin .main{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:calc(28px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom))!important;overflow-x:hidden!important}
+  .page-admin .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  .page-admin .stat{min-width:0!important;padding:18px 14px!important}
+  .page-admin .tbl-wrap{max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .page-admin .tbl-wrap table{width:max-content!important;min-width:720px!important}
+  .page-admin .grid-cards,.page-admin .codes-layout,.page-admin .settings-grid,.page-admin .pb-grid{grid-template-columns:minmax(0,1fr)!important}
+  .page-admin .filter-tabs,.page-admin .pb-tabs,.page-admin .pb-actions{max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important}
+  .page-admin .menu-fab{display:grid!important;left:auto!important;right:16px!important;bottom:calc(16px + env(safe-area-inset-bottom))!important;z-index:180!important}
+}
+</style>
+</head>
+<body class="page-admin">
+
+<!-- LOGIN -->
+<div class="login" id="login">
+  <div class="login-box">
+    <div class="mark">AS</div>
+    <h1 class="disp">Admin Panel</h1>
+    <p>Ahmed Saeed Coaching · secure access</p>
+    <input type="email" id="email" placeholder="Email" autocomplete="username">
+    <input type="password" id="pwd" placeholder="Password" autocomplete="current-password">
+    <button id="loginBtn">Sign In</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <aside class="side" id="side">
+    <div class="brand"><span class="mark">AS</span><div><div class="t">Ahmed Saeed</div><div class="s">ADMIN</div></div></div>
+    <div class="nav-item active" data-view="dash"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Dashboard</span></div>
+    <div class="nav-item" data-view="clients"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg><span>Clients</span><span class="badge" id="badgeClients" style="display:none">0</span></div>
+    <div class="nav-item" data-view="subs"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Subscriptions</span><span class="badge" id="badgeSubs" style="display:none">0</span></div>
+    <div class="nav-item" data-view="plans"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 010-4h12v4"/><path d="M4 6v12a2 2 0 002 2h14v-4"/><circle cx="16" cy="14" r="2"/></svg><span>Plans & Pricing</span></div>
+    <div class="nav-item" data-view="results"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Transformations</span></div>
+    <div class="nav-item" data-view="reviews"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg><span>Reviews</span></div>
+    <div class="nav-item" data-view="codes"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 3.4a2 2 0 00-2.8 0l-9 9a5 5 0 107 7l9-9a2 2 0 000-2.8z"/><line x1="7" y1="17" x2="7" y2="17"/></svg><span>Discount Codes</span></div>
+    <div class="nav-item" data-view="programs"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11H3v10h6V11zM21 3h-6v18h6V3zM15 7H9v14h6V7z"/></svg><span>Programs</span></div>
+    <div class="nav-item" data-view="settings"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></div>
+    <div class="logout"><div class="nav-item" id="logoutBtn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Sign Out</span></div></div>
+  </aside>
+
+  <div class="side-scrim" id="sideScrim" aria-hidden="true"></div>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <div class="view active" id="v_dash">
+      <div class="page-head"><div><h1>Dashboard</h1><p>Overview of your coaching business</p></div></div>
+      <div class="stats">
+        <div class="stat"><div class="l">Total Clients</div><div class="n" id="stClients">0</div></div>
+        <div class="stat"><div class="l">Active Subscriptions</div><div class="n acc" id="stActive">0</div></div>
+        <div class="stat"><div class="l">Pending Payments</div><div class="n" id="stPending">0</div></div>
+        <div class="stat"><div class="l">In Progress</div><div class="n" id="stInProgress">0</div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="l">Expiring in 7 days</div><div class="n" id="stExpiring">0</div></div>
+        <div class="stat"><div class="l">Revenue (EGP)</div><div class="n acc" id="stRevEg">0</div></div>
+        <div class="stat"><div class="l">Revenue (USD)</div><div class="n" id="stRevUsd">$0</div></div>
+        <div class="stat"><div class="l">Active Codes</div><div class="n" id="stCodes">0</div></div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="view" id="v_clients">
+      <div class="page-head"><div><h1>Clients</h1><p>Assessment submissions</p></div></div>
+      <div class="toolbar">
+        <div class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4-4"/></svg><input id="clientSearch" placeholder="Search by name or phone…"></div>
+        <div class="filter-tabs" id="clientFilter"><button class="active" data-f="all">All</button><button data-f="new">New</button><button data-f="in_progress">In Progress</button><button data-f="complete">Complete</button><button data-f="archived">Archived</button></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Goal</th><th>Subscription</th><th>Phone</th><th>Status</th><th></th></tr></thead><tbody id="clientsBody"></tbody></table></div>
+    </div>
+
+    <!-- SUBSCRIPTIONS -->
+    <div class="view" id="v_subs">
+      <div class="page-head"><div><h1>Subscriptions</h1><p>Payments & registrations</p></div><button class="btn btn-primary" id="addManualBtn">+ Add Manual</button></div>
+      <div class="toolbar">
+        <div class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4-4"/></svg><input id="subSearch" placeholder="Search by name…"></div>
+        <div class="filter-tabs" id="subFilter"><button class="active" data-f="all">All</button><button data-f="pending">Pending</button><button data-f="approved">Approved</button><button data-f="active">Active</button><button data-f="frozen">Frozen</button><button data-f="expired">Expired</button><button data-f="rejected">Rejected</button><button data-f="archived">Archived</button></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Plan</th><th>Duration</th><th>Amount</th><th>Period</th><th>Status</th><th></th></tr></thead><tbody id="subsBody"></tbody></table></div>
+    </div>
+
+    <!-- PLANS -->
+    <div class="view" id="v_plans">
+      <div class="page-head"><div><h1>Plans & Pricing</h1><p>Edit prices — changes reflect on the site instantly</p></div><button class="btn btn-primary" id="savePlans">Save Changes</button></div>
+      <div class="filter-tabs" style="width:fit-content;margin-bottom:20px" id="planRegionTab"><button class="active" data-r="eg">🇪🇬 Egypt (EGP)</button><button data-r="intl">🌍 International (USD)</button></div>
+      <div class="grid-cards" id="plansGrid"></div>
+    </div>
+
+    <!-- TRANSFORMATIONS -->
+    <div class="view" id="v_results">
+      <div class="page-head"><div><h1>Transformations</h1><p>Before & after — shown side by side on the site</p></div><button class="btn btn-primary" id="openTfModal">+ Add Transformation</button></div>
+      <div class="grid-cards" id="resultsGrid"></div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="view" id="v_reviews">
+      <div class="page-head"><div><h1>Reviews</h1><p>Feedback screenshots shown on the site</p></div></div>
+      <div class="grid-cards" id="reviewsGrid"></div>
+      <input type="file" id="reviewFile" accept="image/*">
+    </div>
+
+    <!-- CODES -->
+    <div class="view" id="v_codes">
+      <div class="page-head"><div><h1>Discount Codes</h1><p>Create & manage promo codes</p></div></div>
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start" class="codes-layout">
+        <div class="form-card">
+          <div class="fld"><label>Code</label><input id="c_code" placeholder="SUMMER25" style="text-transform:uppercase"></div>
+          <div class="fld row"><div><label>Discount %</label><input id="c_pct" type="number" min="1" max="100" value="10"></div><div><label>Expiry (optional)</label><input id="c_exp" type="date"></div></div>
+          <div class="fld"><label>Restrict to plan (optional)</label><select id="c_plan">
+            <option value="">All plans (Egypt + International)</option>
+            <optgroup label="🇪🇬 Egypt (EGP)">
+              <option value="eg:">All Egypt plans</option>
+              <option value="eg:basic">Egypt · Basic</option>
+              <option value="eg:pro">Egypt · Pro</option>
+              <option value="eg:elite">Egypt · Elite (VIP)</option>
+            </optgroup>
+            <optgroup label="🌍 International (USD)">
+              <option value="intl:">All International plans</option>
+              <option value="intl:pro">International · Pro</option>
+              <option value="intl:elite">International · Elite (VIP)</option>
+            </optgroup>
+          </select></div>
+          <button class="btn btn-primary" id="createCode" style="width:100%">Create Code</button>
+        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>Code</th><th>%</th><th>Plan</th><th>Expiry</th><th>Used</th><th>Status</th><th></th></tr></thead><tbody id="codesBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view" id="v_programs" dir="rtl">
+      <div class="page-head" style="direction:rtl">
+        <div><h1>الأنظمة</h1><p>إنشاء أنظمة غذائية وبرامج تمرين — تصدير PDF / Excel</p></div>
+        <div class="pb-actions">
+          <div class="pb-langseg" id="pbLang">
+            <button class="active" data-lang="ar">عربي</button>
+            <button data-lang="en">English</button>
+          </div>
+          <button class="btn btn-ghost" id="pbManageBtn" onclick="pbManageClick()">إدارة الأصناف</button>
+          <button class="btn btn-ghost" onclick="pbOpenSaved()">📁 البرامج المحفوظة</button>
+          <button class="btn btn-ghost" onclick="pbSaveProgram()">💾 احفظ البرنامج</button>
+          <button class="btn btn-ghost" onclick="pbExcel()">Excel</button>
+          <button class="btn btn-primary" onclick="pbPDF()">تصدير PDF</button>
+          <button class="btn btn-ghost" id="pbServerBtn" onclick="pbPDFServer()">📄 PDF (سيرفر)</button>
+        </div>
+      </div>
+      <div id="pbEditingBar" style="display:none;margin:-8px 0 16px;padding:9px 14px;background:rgba(79,209,197,.08);border:1px solid rgba(79,209,197,.25);border-radius:10px;font-size:13px;color:var(--accent);direction:rtl">
+        ✏️ بتعدّل في برنامج محفوظ: <b id="pbEditingName"></b> — لو حفظت هيتحدّث. <a href="#" onclick="pbClearEditing();return false" style="color:var(--ink-2);margin-inline-start:8px">إلغاء التعديل (ابدأ جديد)</a>
+      </div>
+
+      <div class="pb-tabs" style="direction:rtl">
+        <button class="pb-tab active" id="pbtab-diet" onclick="pbSwitch('diet')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h1v11M6 2v9M18 2c-1.1 0-2 2-2 5s.9 5 2 5h1v9"/></svg>النظام الغذائي</button>
+        <button class="pb-tab" id="pbtab-workout" onclick="pbSwitch('workout')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5l11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4M6 18l-4 4"/></svg>نظام التمرين</button>
+      </div>
+
+      <!-- DIET -->
+      <div class="pb-view active" id="pbview-diet" style="direction:rtl">
+        <div class="pb-grid">
+          <div>
+            <div class="pb-card">
+              <div class="pb-card-h">01 / بيانات النظام</div>
+              <div class="pb-row2" style="margin-bottom:13px">
+                <div class="pb-fld"><label>اسم العميل</label><input id="pb_clientName" placeholder="اكتب اسم العميل"></div>
+                <div class="pb-fld"><label>هدف النظام</label><select id="pb_goal"><option>تنشيف / خسارة دهون</option><option>تضخيم / بناء عضل</option><option>ثبات / لياقة عامة</option></select></div>
+              </div>
+              <div class="pb-row3">
+                <div class="pb-fld"><label>الوزن (كجم)</label><input id="pb_weight" type="number" placeholder="80"></div>
+                <div class="pb-fld"><label>الطول (سم)</label><input id="pb_height" type="number" placeholder="175"></div>
+                <div class="pb-fld"><label>مدة الخطة</label><input id="pb_duration" placeholder="4 أسابيع"></div>
+              </div>
+            </div>
+            <div class="pb-card">
+              <div class="pb-card-h">02 / السعرات المستهدفة (اختياري)</div>
+              <div class="pb-row4">
+                <div class="pb-fld"><label>سعرات</label><input id="pb_tCal" type="number" placeholder="1800"></div>
+                <div class="pb-fld"><label>بروتين</label><input id="pb_tPro" type="number" placeholder="150"></div>
+                <div class="pb-fld"><label>كارب</label><input id="pb_tCarb" type="number" placeholder="180"></div>
+                <div class="pb-fld"><label>دهون</label><input id="pb_tFat" type="number" placeholder="50"></div>
+              </div>
+            </div>
+            <div class="pb-card-h" style="margin:22px 0 12px">03 / الوجبات</div>
+            <div id="pb_meals"></div>
+            <button class="pb-add-block" onclick="pbAddMeal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>إضافة وجبة</button>
+            <div class="pb-card" style="margin-top:22px"><div class="pb-card-h">04 / المكملات</div>
+              <textarea id="pb_supps" placeholder="كل سطر مكمّل"></textarea></div>
+            <div class="pb-card"><div class="pb-card-h">05 / PEDs</div>
+              <textarea id="pb_peds" placeholder="كل سطر بند"></textarea></div>
+            <div class="pb-card"><div class="pb-card-h">06 / وصفات</div>
+              <textarea id="pb_recipes" placeholder="اكتب وصفة أو أكتر" style="min-height:140px"></textarea></div>
+            <div class="pb-card"><div class="pb-card-h">07 / التعليمات العامة</div>
+              <textarea id="pb_notes" style="min-height:160px" placeholder="كل سطر تعليمة"></textarea></div>
+          </div>
+          <div class="pb-side">
+            <div class="pb-totals">
+              <div class="pb-totals-h"><span class="e">MACROS DAILY TOTAL</span><h3>إجمالي اليوم</h3></div>
+              <div class="pb-bigcal"><div class="n" id="pb_totCal">0</div><div class="l">KCAL / السعرات</div></div>
+              <div class="pb-mg">
+                <div class="pb-mb p"><div class="n" id="pb_totP">0</div><div class="l">بروتين</div></div>
+                <div class="pb-mb c"><div class="n" id="pb_totC">0</div><div class="l">كارب</div></div>
+                <div class="pb-mb f"><div class="n" id="pb_totF">0</div><div class="l">دهون</div></div>
+              </div>
+              <div class="pb-tw" id="pb_targetWrap" style="display:none"><p style="font-family:var(--ff-mono);font-size:11px;color:var(--ink-3);letter-spacing:1px;margin-bottom:8px">مقارنة بالهدف</p><div id="pb_targetBars"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKOUT -->
+      <div class="pb-view" id="pbview-workout" style="direction:rtl">
+        <div class="pb-grid">
+          <div>
+            <div class="pb-card">
+              <div class="pb-card-h">01 / بيانات البرنامج</div>
+              <div class="pb-row2" style="margin-bottom:13px">
+                <div class="pb-fld"><label>اسم العميل</label><input id="pb_wClientName" placeholder="اكتب اسم العميل"></div>
+                <div class="pb-fld"><label>نظام التمرين</label>
+                  <select id="pb_wSplit" onchange="pbSplitChange(this.value)">
+                    <option value="Push / Pull / Legs (PPL)">Push / Pull / Legs (PPL)</option>
+                    <option value="Upper / Lower">Upper / Lower</option>
+                    <option value="Full Body">Full Body</option>
+                    <option value="Bro Split">Bro Split</option>
+                    <option value="Anterior / Posterior">Anterior / Posterior</option>
+                    <option value="__custom__">✏️ اكتب اسم نظام جديد…</option>
+                  </select>
+                  <input id="pb_wSplitCustom" placeholder="اكتب اسم نظام التمرين" style="display:none;margin-top:8px">
+                </div>
+              </div>
+              <div class="pb-row2">
+                <div class="pb-fld"><label>الهدف</label><select id="pb_wGoal"><option>تضخيم / بناء عضل</option><option>تنشيف / خسارة دهون</option><option>قوة</option><option>لياقة عامة</option></select></div>
+                <div class="pb-fld"><label>مدة البرنامج</label><input id="pb_wDuration" placeholder="8 أسابيع"></div>
+              </div>
+            </div>
+            <div class="pb-card-h" style="margin:22px 0 12px">02 / أيام التمرين</div>
+            <div id="pb_days"></div>
+            <button class="pb-add-block" onclick="pbAddDay()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>إضافة يوم تمرين</button>
+            <div class="pb-card" style="margin-top:22px"><div class="pb-card-h">03 / ملاحظات عامة</div>
+              <textarea id="pb_wNotes" placeholder="كل سطر ملاحظة"></textarea></div>
+          </div>
+          <div class="pb-side">
+            <div class="pb-totals">
+              <div class="pb-totals-h"><span class="e">PROGRAM OVERVIEW</span><h3>ملخص البرنامج</h3></div>
+              <div class="pb-wsum">
+                <div class="pb-wsr"><span>عدد أيام التمرين</span><b id="pb_wDays">0</b></div>
+                <div class="pb-wsr"><span>إجمالي التمارين</span><b id="pb_wExercises">0</b></div>
+                <div class="pb-wsr"><span>إجمالي المجاميع</span><b id="pb_wSets">0</b></div>
+              </div>
+            </div>
+            <div class="pb-card" style="margin-top:16px">
+              <p style="font-family:var(--ff-mono);font-size:11px;color:var(--ink-3);letter-spacing:1px;margin-bottom:8px">ملاحظة</p>
+              <p style="font-size:13px;color:var(--ink-2);line-height:1.9">دوس على خانة اسم التمرين تشوف تمارينك المحفوظة واختار منها باللينك بتاعها أوتوماتيك، أو اكتب اسم جديد واحفظه.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="v_settings">
+      <div class="page-head"><div><h1>Settings</h1><p>Site numbers & account</p></div><button class="btn btn-primary" id="saveSettings">Save Settings</button></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start" class="settings-grid">
+        <div class="form-card" style="max-width:none">
+          <h3 style="font-family:var(--ff-display);font-size:16px;margin-bottom:4px">Explainer video</h3>
+          <p style="color:var(--ink-3);font-size:12.5px;margin-bottom:18px">"How to subscribe" video on the homepage. It stays hidden until you upload one.</p>
+          <div id="videoState" style="font-size:13px;margin-bottom:12px;font-family:var(--ff-mono);color:var(--ink-3)">No video uploaded</div>
+          <input type="file" id="videoFile" accept="video/*" style="display:none">
+          <button class="btn btn-primary" id="videoUploadBtn" style="width:100%;margin-bottom:10px">Upload video</button>
+          <button class="btn btn-ghost" id="videoRemoveBtn" style="width:100%;border-color:var(--danger);color:var(--danger);display:none">Remove video</button>
+          <p style="color:var(--ink-3);font-size:11.5px;margin-top:12px;line-height:1.6">Supabase free tier limit is <b>50MB per file</b>. Record 1080p30 (not 4K) or compress with CapCut/HandBrake — ~2 min ≈ 20-30MB.</p>
+        </div>
+
+        <div class="form-card" style="max-width:none">
+          <h3 style="font-family:var(--ff-display);font-size:16px;margin-bottom:4px">Site numbers</h3>
+          <p style="color:var(--ink-3);font-size:12.5px;margin-bottom:18px">Shown on the public website</p>
+          <div class="fld"><label>Total clients</label><input id="s_clients" type="number"></div>
+          <div class="fld"><label>Years of experience</label><input id="s_years" type="number"></div>
+        </div>
+
+        <div class="form-card" style="max-width:none">
+          <h3 style="font-family:var(--ff-display);font-size:16px;margin-bottom:4px">Change password</h3>
+          <p style="color:var(--ink-3);font-size:12.5px;margin-bottom:18px" id="pwAccount">Signed in as —</p>
+          <div class="fld"><label>Current password</label><input id="pw_old" type="password" autocomplete="current-password"></div>
+          <div class="fld"><label>New password</label><input id="pw_new" type="password" autocomplete="new-password"></div>
+          <div class="fld"><label>Confirm new password</label><input id="pw_new2" type="password" autocomplete="new-password"></div>
+          <div id="pwStrength" style="font-size:12px;margin-bottom:12px;min-height:16px;font-family:var(--ff-mono)"></div>
+          <div id="pwMsg" style="font-size:13px;margin-bottom:12px;min-height:18px"></div>
+          <button class="btn btn-primary" id="changePwBtn" style="width:100%">Update Password</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<button class="menu-fab" id="menuFab" type="button" aria-label="Open navigation" aria-controls="side" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+
+<!-- CLIENT MODAL -->
+<div class="modal" id="clientModal"><div class="modal-box">
+  <div class="modal-head"><h2 id="cmName">Client</h2><button class="modal-close" id="cmClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="status-bar" id="cmStatusBar"></div>
+  <div class="detail-grid" id="cmGrid"></div>
+  <div class="photos-row" id="cmPhotos"></div>
+  <div class="modal-actions"><a class="btn btn-primary" id="cmWa" target="_blank">Message on WhatsApp</a><button class="btn btn-ghost" id="cmDel" style="border-color:var(--danger);color:var(--danger)">Delete Client</button></div>
+</div></div>
+
+<!-- SUB MODAL -->
+<div class="modal" id="subModal"><div class="modal-box">
+  <div class="modal-head"><h2 id="smName">Subscription</h2><button class="modal-close" id="smClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="detail-grid" id="smGrid"></div>
+  <div id="smProof" style="margin-bottom:22px"></div>
+  <div class="modal-actions" id="smActions"></div>
+</div></div>
+
+<!-- MANUAL ADD SUBSCRIPTION MODAL -->
+<div class="modal" id="manualModal"><div class="modal-box">
+  <div class="modal-head"><h2>Add Subscription Manually</h2><button class="modal-close" id="mmClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <p style="color:var(--ink-3);font-size:12.5px;margin-bottom:16px">For WhatsApp clients who paid outside the site. If a client already filled the intake form with the same phone, it links automatically.</p>
+  <div class="fld"><label>Full name</label><input id="mm_name" placeholder="Client name"></div>
+  <div class="fld"><label>WhatsApp</label><input id="mm_wa" placeholder="01xxxxxxxxx" style="direction:ltr"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="fld"><label>Plan</label><input id="mm_plan" placeholder="Gold / VIP …"></div>
+    <div class="fld"><label>Duration (months)</label><input id="mm_months" type="number" value="3"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="fld"><label>Amount</label><input id="mm_amount" type="number" placeholder="2000"></div>
+    <div class="fld"><label>Region</label><select id="mm_region"><option value="eg">Egypt (EGP)</option><option value="intl">International (USD)</option></select></div>
+  </div>
+  <label style="display:flex;align-items:center;gap:9px;margin:8px 0 18px;cursor:pointer;font-size:14px">
+    <input type="checkbox" id="mm_activate" checked style="width:16px;height:16px;accent-color:var(--accent)">
+    Activate immediately (start the counter now)
+  </label>
+  <div class="modal-actions">
+    <button class="btn btn-ghost" id="mmCancel">Cancel</button>
+    <button class="btn btn-primary" id="mmSave">Add Subscription</button>
+  </div>
+</div></div>
+
+<!-- TRANSFORMATION MODAL -->
+<div class="modal" id="tfModal"><div class="modal-box" style="max-width:640px">
+  <div class="modal-head"><h2>Add Transformation</h2><button class="modal-close" id="tfClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <p style="color:var(--ink-3);font-size:13.5px;margin-bottom:18px">Upload each photo, then <b style="color:var(--ink-2)">drag to move</b> and use the slider to <b style="color:var(--ink-2)">zoom</b> so the full body shows. They appear side by side (Before → After) on the site.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px">
+    <div class="tf-col">
+      <div class="tf-col-lbl">BEFORE</div>
+      <div class="cropper" id="cropBefore" data-empty="1">
+        <label class="cropper-empty" for="tfBefore">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span>Click to upload</span>
+        </label>
+        <canvas class="crop-canvas" id="canvasBefore"></canvas>
+      </div>
+      <input type="range" class="zoom" id="zoomBefore" min="1" max="3" step="0.01" value="1" style="display:none">
+      <button type="button" class="tf-change" id="changeBefore" style="display:none">Change photo</button>
+    </div>
+    <div class="tf-col">
+      <div class="tf-col-lbl">AFTER</div>
+      <div class="cropper" id="cropAfter" data-empty="1">
+        <label class="cropper-empty" for="tfAfter">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span>Click to upload</span>
+        </label>
+        <canvas class="crop-canvas" id="canvasAfter"></canvas>
+      </div>
+      <input type="range" class="zoom" id="zoomAfter" min="1" max="3" step="0.01" value="1" style="display:none">
+      <button type="button" class="tf-change" id="changeAfter" style="display:none">Change photo</button>
+    </div>
+  </div>
+  <input type="file" id="tfBefore" accept="image/*"><input type="file" id="tfAfter" accept="image/*">
+  <button class="btn btn-primary" id="tfSave" style="width:100%">Save Transformation</button>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== CONFIG ===== */
+const SURL="https://YOUR_PROJECT.supabase.co";
+const SKEY="YOUR_SUPABASE_ANON_KEY";
+let sb=null;try{ sb=supabase.createClient(SURL,SKEY); }catch(e){}
+
+/* ===== LOGIN — real Supabase Auth (server-verified) ===== */
+async function tryLogin(){
+  const email=(document.getElementById('email')||{}).value?.trim();
+  const pass=document.getElementById('pwd').value;
+  const errEl=document.getElementById('loginErr');
+  const btn=document.getElementById('loginBtn');
+  if(!email||!pass){errEl.textContent='Enter your email and password';return;}
+  errEl.textContent='';btn.disabled=true;btn.textContent='Signing in…';
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error||!data.session){
+      errEl.textContent='Incorrect email or password';
+      btn.disabled=false;btn.textContent='Sign In';
+      return;
+    }
+    showApp();
+  }catch(e){
+    errEl.textContent='Could not sign in — '+errMsg(e);
+    btn.disabled=false;btn.textContent='Sign In';
+  }
+}
+function showApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').classList.add('show');
+  initApp();
+}
+document.getElementById('loginBtn').onclick=tryLogin;
+document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+document.addEventListener('DOMContentLoaded',()=>{
+  const em=document.getElementById('email');
+  if(em)em.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('pwd').focus();});
+});
+/* restore an existing session on refresh */
+(async()=>{
+  try{
+    const {data}=await sb.auth.getSession();
+    if(data && data.session) showApp();
+  }catch(e){}
+})();
+document.getElementById('logoutBtn').onclick=async()=>{
+  try{ await sb.auth.signOut(); }catch(e){}
+  location.reload();
+};
+
+/* ===== NAV ===== */
+const sideEl=document.getElementById('side');
+const sideScrim=document.getElementById('sideScrim');
+const menuFab=document.getElementById('menuFab');
+function setMobileMenu(open){
+  const active=Boolean(open&&window.matchMedia('(max-width:860px)').matches);
+  sideEl.classList.toggle('open',active);
+  sideScrim.classList.toggle('open',active);
+  document.body.classList.toggle('admin-menu-open',active);
+  menuFab.setAttribute('aria-expanded',String(active));
+  menuFab.setAttribute('aria-label',active?'Close navigation':'Open navigation');
+}
+document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.onclick=()=>{
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));n.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('v_'+n.dataset.view).classList.add('active');
+  setMobileMenu(false);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+menuFab.onclick=()=>setMobileMenu(!sideEl.classList.contains('open'));
+sideScrim.onclick=()=>setMobileMenu(false);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setMobileMenu(false);});
+window.addEventListener('resize',()=>{if(window.innerWidth>860)setMobileMenu(false);});
+
+/* ===== HELPERS ===== */
+function errMsg(e){try{return (e&&(e.message||e.error_description||e.msg))||String(e)}catch(_){return 'unknown error'}}
+function genId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&0x3|0x8)).toString(16);});}
+function toast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');setTimeout(()=>t.className='toast',type==='err'?7000:2600);}
+function waPhone(p){if(!p)return'';let d=(''+p).replace(/\D/g,'');if(d.startsWith('0'))d='2'+d;if(!d.startsWith('20')&&d.length===10)d='20'+d;return d;}
+function fmt(n){return Number(n||0).toLocaleString('en-US');}
+function esc(s){return(s==null?'':''+s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+
+/* ===== private files: turn a stored URL into a temporary signed link =====
+   client-photos and payment-proofs are PRIVATE buckets. Only a logged-in
+   admin can read them, and only via a short-lived signed URL. */
+function filePathFromUrl(url,bucket){
+  if(!url)return null;
+  const marker='/'+bucket+'/';
+  const i=url.indexOf(marker);
+  if(i<0) return url.split('/').pop();          // fallback: bare filename
+  return url.slice(i+marker.length).split('?')[0];
+}
+async function signedUrl(url,bucket,seconds){
+  try{
+    const path=filePathFromUrl(url,bucket);
+    if(!path)return null;
+    const {data,error}=await sb.storage.from(bucket).createSignedUrl(path,seconds||3600);
+    if(error||!data)return null;
+    return data.signedUrl;
+  }catch(e){return null;}
+}
+
+/* ===== date + status helpers ===== */
+function fmtDate(d){ if(!d)return '—'; const x=new Date(d); if(isNaN(x))return '—'; return x.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function addMonths(dateStr,months){ const d=new Date(dateStr); d.setMonth(d.getMonth()+Number(months||0)); return d; }
+// ---- Lifecycle model ----
+// The counter starts at activated_at (set when the coach marks the client Complete),
+// NOT at approval. end = activated_at + duration_months + freeze_days.
+// While frozen, the counter is visually paused (computed from frozen_at).
+function subActivated(s){ return s.activated_at ? new Date(s.activated_at) : null; }
+function subEnd(s){
+  // explicit end_date wins (kept in sync on activate/renew/unfreeze)
+  if(s.end_date) { const e=new Date(s.end_date); if(!isNaN(e)) return e; }
+  const a=subActivated(s); if(!a) return null;
+  const base=addMonths(a, s.duration_months); base.setDate(base.getDate()+Number(s.freeze_days||0));
+  return base;
+}
+function subStart(s){ return subActivated(s) || (s.start_date?new Date(s.start_date):(s.created_at?new Date(s.created_at):null)); }
+// "counting" = an activated subscription whose time is ticking (active) — not frozen/expired
+function subIsActive(s){ return s.status==='active'; }
+function subIsFrozen(s){ return s.status==='frozen'; }
+function subDaysLeft(s){
+  const e=subEnd(s); if(!e)return null;
+  // when frozen, freeze the displayed number at the moment of frozen_at
+  const ref = subIsFrozen(s) && s.frozen_at ? new Date(s.frozen_at) : new Date();
+  return Math.ceil((e-ref)/(1000*60*60*24));
+}
+// find latest subscription for a client (by client_id)
+function clientSub(clientId){ return SUBS.filter(s=>s.client_id===clientId).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]||null; }
+const CLIENT_STATUS={ new:{label:'New',cls:'new'}, in_progress:{label:'In Progress',cls:'pending'}, complete:{label:'Complete',cls:'approved'} };
+function clientStatusInfo(st){ return CLIENT_STATUS[st]||CLIENT_STATUS.new; }
+// archive helpers
+const ARCHIVE_DAYS=7;
+function isArchived(r){ return !!r.archived_at; }
+function archiveDaysLeft(r){ if(!r.archived_at)return null; const del=new Date(r.archived_at); del.setDate(del.getDate()+ARCHIVE_DAYS); return Math.ceil((del-new Date())/(1000*60*60*24)); }
+
+
+let CLIENTS=[],SUBS=[],CODES=[],PLANS=[],SETTINGS={};
+let planRegion='eg';
+
+/* ===== INIT ===== */
+async function initApp(){
+  if(!sb){toast('Connect Supabase to load data','err');return;}
+  await purgeExpiredArchive();  // auto-delete archived items older than 7 days
+  await Promise.all([loadClients(),loadSubs(),loadCodes(),loadPlans(),loadSettings()]);
+  await autoExpireSubs();       // flip any active subs whose time is up to 'expired'
+  renderClients(); // re-render now that SUBS is loaded (client subscription column)
+  renderDash();
+  // live counters: re-render every minute so "days left" stays current without reload
+  if(!window._subTick){ window._subTick=setInterval(()=>{ try{renderSubs();renderClients();renderDash();}catch(e){} },60000); }
+}
+// flip active subscriptions whose end date passed into 'expired' (once), so the
+// UI + counts are correct even before the email cron runs.
+async function autoExpireSubs(){
+  try{
+    const now=new Date();
+    const due=SUBS.filter(s=>s.status==='active' && subEnd(s) && subEnd(s)<now);
+    for(const s of due){
+      await sb.from('subscriptions').update({status:'expired'}).eq('id',s.id);
+      s.status='expired';
+    }
+  }catch(e){}
+}
+// permanently delete anything archived more than ARCHIVE_DAYS ago
+async function purgeExpiredArchive(){
+  try{
+    const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-ARCHIVE_DAYS);
+    const iso=cutoff.toISOString();
+    await sb.from('clients').delete().not('archived_at','is',null).lt('archived_at',iso);
+    await sb.from('subscriptions').delete().not('archived_at','is',null).lt('archived_at',iso);
+  }catch(e){}
+}
+
+/* ===== CLIENTS ===== */
+async function loadClients(){
+  const {data}=await sb.from('clients').select('*').order('created_at',{ascending:false});
+  CLIENTS=data||[];renderClients();
+  const nw=CLIENTS.filter(c=>(c.status||'new')==='new'&&!isArchived(c)).length;
+  const b=document.getElementById('badgeClients');if(nw){b.style.display='inline-block';b.textContent=nw;}else b.style.display='none';
+}
+let clientF='all';
+function renderClients(){
+  const q=(document.getElementById('clientSearch').value||'').toLowerCase();
+  const showArchived = clientF==='archived';
+  let list=CLIENTS.filter(c=>{
+    if(showArchived) return isArchived(c);
+    if(isArchived(c)) return false;                    // hide archived from normal views
+    return clientF==='all'||(c.status||'new')===clientF;
+  });
+  if(q)list=list.filter(c=>(c.full_name||'').toLowerCase().includes(q)||(''+(c.phone||'')).includes(q));
+  const b=document.getElementById('clientsBody');
+  if(!list.length){b.innerHTML=`<tr><td colspan="6"><div class="empty">${showArchived?'Archive is empty':'No clients yet'}</div></td></tr>`;return;}
+  b.innerHTML=list.map(c=>{
+    const si=clientStatusInfo(c.status||'new');
+    const sub=clientSub(c.id);
+    let subCell='<span style="color:var(--ink-3)">—</span>';
+    if(sub && (sub.status==='active'||sub.status==='frozen'||sub.status==='expired')){
+      const dl=subDaysLeft(sub);
+      const cls = sub.status==='frozen'?'pending':(sub.status==='expired'||(dl!=null&&dl<0)?'rejected':'approved');
+      const lbl = sub.status==='frozen'?'⏸ Frozen':(sub.status==='expired'||(dl!=null&&dl<0)?'○ Expired':'● Active');
+      subCell=`<span class="pill ${cls}" style="font-size:11px">${lbl}</span><div style="font-size:11px;color:var(--ink-3);margin-top:3px;font-family:var(--ff-mono)">${fmtDate(subEnd(sub))}</div>`;
+    }else if(sub && sub.status==='approved'){
+      subCell='<span class="pill pending" style="font-size:11px">⏳ Awaiting Complete</span>';
+    }else if(sub && sub.status==='pending'){
+      subCell='<span class="pill pending" style="font-size:11px">Pending</span>';
+    }
+    const nm=esc(c.full_name).replace(/'/g,'');
+    const actions = showArchived
+      ? `<button class="icon-btn" title="View" onclick="viewClient('${c.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+         <button class="icon-btn ok" title="Restore" onclick="restoreClient('${c.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6M3 13a9 9 0 103-7.7L3 8"/></svg></button>
+         <button class="icon-btn no" title="Delete now" onclick="delClient('${c.id}','${nm}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>`
+      : `<button class="icon-btn" title="View" onclick="viewClient('${c.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+         <a class="icon-btn wa" title="WhatsApp" href="https://wa.me/${waPhone(c.phone)}" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.9-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-.9 2.1-.9 2.3.1.2 1.4 3.3 4.2 4.6 2 .9 2.5.8 3 .8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4z"/></svg></a>
+         <button class="icon-btn warn" title="Archive" onclick="archiveClient('${c.id}','${nm}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg></button>`;
+    const archiveNote = showArchived ? `<div style="font-size:11px;color:var(--warn);margin-top:2px;font-family:var(--ff-mono)">Auto-deletes in ${archiveDaysLeft(c)}d</div>` : '';
+    return `<tr>
+      <td style="font-weight:600">${esc(c.full_name)}<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-family:var(--ff-mono)">Joined ${fmtDate(c.created_at)}</div>${archiveNote}</td>
+      <td>${esc(c.goal||'—')}</td>
+      <td>${subCell}</td>
+      <td class="disp" style="font-family:var(--ff-mono)">${esc(c.phone||'—')}</td>
+      <td><span class="pill ${si.cls}">${si.label}</span></td>
+      <td><div class="tbl-actions">${actions}</div></td></tr>`;
+  }).join('');
+}
+window.viewClient=id=>{
+  const c=CLIENTS.find(x=>x.id===id);if(!c)return;
+  document.getElementById('cmName').textContent=c.full_name;
+  // status switcher
+  const cur=c.status||'new';
+  const sub=clientSub(c.id);
+  const statuses=[['new','New'],['in_progress','In Progress'],['complete','Complete']];
+  document.getElementById('cmStatusBar').innerHTML=`
+    <div class="sb-label">Client stage</div>
+    <div class="sb-btns">${statuses.map(([k,l])=>`<button class="sb-btn ${cur===k?'active':''}" onclick="setClientStatus('${c.id}','${k}')">${l}</button>`).join('')}</div>`;
+  // build detail rows incl. dates + subscription
+  const rows=[['Registered',fmtDate(c.created_at)],['Age',c.age],['Gender',c.gender],['Weight',c.weight?c.weight+' kg':'—'],['Height',c.height?c.height+' cm':'—'],['Phone',c.phone],['Email',c.email],['Goal',c.goal],['Level',c.fitness_level],['Training days',c.training_days],['Other sports',c.other_sports]];
+  if(sub && (sub.status==='active'||sub.status==='frozen'||sub.status==='expired')){
+    const dl=subDaysLeft(sub);
+    rows.push(['Subscription',`${esc(sub.plan)} · ${sub.duration_months} mo`]);
+    rows.push(['Sub. started',fmtDate(subActivated(sub))]);
+    rows.push(['Sub. ends',fmtDate(subEnd(sub))+(dl!=null&&dl>=0&&sub.status==='active'?` (${dl} days left)`:'')]);
+    const lbl=sub.status==='frozen'?'⏸ Frozen':(sub.status==='expired'||(dl!=null&&dl<0)?'🔴 Expired':'🟢 Active');
+    rows.push(['Sub. status',lbl]);
+  }else if(sub && sub.status==='approved'){
+    rows.push(['Subscription',`${esc(sub.plan)} · ${sub.duration_months} mo`]);
+    rows.push(['Sub. status','⏳ Approved — mark Complete to start']);
+  }else if(sub && sub.status==='pending'){
+    rows.push(['Subscription',`${esc(sub.plan)} · ${sub.duration_months} mo`]);
+    rows.push(['Sub. status','🟡 Pending approval']);
+  }
+  rows.push(['Allergies',c.allergies],['Favorite foods',c.favorite_foods],['Disliked foods',c.disliked_foods],['Supplements',c.supplements],['Medical',c.medical_conditions],['Current injuries',c.current_injuries],['Past injuries',c.past_injuries],['Medications',c.medications],['Notes',c.notes]);
+  document.getElementById('cmGrid').innerHTML=rows.map(([k,v])=>`<div class="detail${['Notes','Supplements','Medical'].includes(k)?' full':''}"><div class="k">${k}</div><div class="v">${esc(v||'—')}</div></div>`).join('');
+  const ph=[['Front',c.photo_front_url],['Side',c.photo_side_url],['Back',c.photo_back_url]].filter(p=>p[1]);
+  const cmPhotos=document.getElementById('cmPhotos');
+  cmPhotos.innerHTML=ph.length?`<div style="grid-column:1/-1;color:var(--ink-3);font-size:12.5px;font-family:var(--ff-mono)">Loading photos…</div>`:'';
+  (async()=>{
+    const signed=await Promise.all(ph.map(p=>signedUrl(p[1],'client-photos',3600)));
+    cmPhotos.innerHTML=ph.map((p,i)=>{
+      const u=signed[i];
+      return u?`<a href="${u}" target="_blank"><img src="${u}" alt="${p[0]}"></a>`
+              :`<div style="border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;aspect-ratio:3/4;color:var(--ink-3);font-size:12px">${p[0]}<br>unavailable</div>`;
+    }).join('');
+  })();
+  document.getElementById('cmWa').href='https://wa.me/'+waPhone(c.phone);
+  document.getElementById('cmDel').onclick=()=>delClient(c.id,c.full_name);
+  document.getElementById('clientModal').classList.add('show');
+};
+window.setClientStatus=async(id,st)=>{
+  try{
+    const {error}=await sb.from('clients').update({status:st}).eq('id',id);
+    if(error) throw error;
+    const c=CLIENTS.find(x=>x.id===id);if(c)c.status=st;
+    // Marking Complete starts the subscription counter (activated_at = now, end = now + duration + freeze_days)
+    if(st==='complete'){
+      const sub=clientSub(id);
+      if(sub && (sub.status==='approved' || sub.status==='pending')){
+        const start=new Date();
+        const end=addMonths(start, sub.duration_months); end.setDate(end.getDate()+Number(sub.freeze_days||0));
+        const patch={status:'active',activated_at:start.toISOString(),start_date:start.toISOString().slice(0,10),end_date:end.toISOString().slice(0,10),notified_10d:false,notified_expired:false};
+        const {error:e2}=await sb.from('subscriptions').update(patch).eq('id',sub.id);
+        if(e2) throw e2;
+        Object.assign(sub,patch);
+        toast('Client Complete — subscription counter started','ok');
+      }else{
+        toast('Client marked Complete','ok');
+      }
+      await loadSubs();
+    }else{
+      toast('Client marked '+clientStatusInfo(st).label,'ok');
+    }
+    viewClient(id); // refresh modal
+    renderClients(); renderDash();
+    const nw=CLIENTS.filter(x=>(x.status||'new')==='new').length;
+    const bd=document.getElementById('badgeClients');if(nw){bd.style.display='inline-block';bd.textContent=nw;}else bd.style.display='none';
+  }catch(e){ toast('Could not update — '+errMsg(e),'err'); }
+};
+window.delClient=async(id,name)=>{
+  if(!confirm('Delete client "'+(name||'')+'" permanently?\nThis cannot be undone.'))return;
+  await sb.from('clients').delete().eq('id',id);
+  document.getElementById('clientModal').classList.remove('show');
+  toast('Client deleted','ok');
+  await loadClients();renderDash();
+};
+window.archiveClient=async(id,name)=>{
+  if(!confirm('Archive client "'+(name||'')+'"?\nIt will be hidden and auto-deleted after '+ARCHIVE_DAYS+' days. You can restore it before then.'))return;
+  await sb.from('clients').update({archived_at:new Date().toISOString()}).eq('id',id);
+  document.getElementById('clientModal').classList.remove('show');
+  toast('Client archived','ok');
+  await loadClients();renderDash();
+};
+window.restoreClient=async id=>{
+  await sb.from('clients').update({archived_at:null}).eq('id',id);
+  toast('Client restored','ok');
+  await loadClients();renderDash();
+};
+document.getElementById('cmClose').onclick=()=>document.getElementById('clientModal').classList.remove('show');
+document.getElementById('clientSearch').oninput=renderClients;
+document.querySelectorAll('#clientFilter button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#clientFilter button').forEach(x=>x.classList.remove('active'));b.classList.add('active');clientF=b.dataset.f;renderClients();});
+
+/* ===== SUBSCRIPTIONS ===== */
+async function loadSubs(){
+  const {data}=await sb.from('subscriptions').select('*').order('created_at',{ascending:false});
+  SUBS=data||[];renderSubs();
+  const pend=SUBS.filter(s=>s.status==='pending'&&!isArchived(s)).length;
+  const b=document.getElementById('badgeSubs');if(pend){b.style.display='inline-block';b.textContent=pend;}else b.style.display='none';
+}
+let subF='all';
+function subCur(s){return (s.region==='intl'||s.currency==='$')?'$':'EGP';}
+function subAmt(s){const c=subCur(s);return c==='$'?'$'+fmt(s.amount_egp):fmt(s.amount_egp)+' EGP';}
+function renderSubs(){
+  const q=(document.getElementById('subSearch').value||'').toLowerCase();
+  const showArchived = subF==='archived';
+  let list=SUBS.filter(s=>{
+    if(showArchived) return isArchived(s);
+    if(isArchived(s)) return false;                 // hide archived from normal views
+    return subF==='all'||s.status===subF;
+  });
+  if(q)list=list.filter(s=>(s.full_name||'').toLowerCase().includes(q));
+  const b=document.getElementById('subsBody');
+  if(!list.length){b.innerHTML=`<tr><td colspan="7"><div class="empty">${showArchived?'Archive is empty':'No subscriptions'}</div></td></tr>`;return;}
+  b.innerHTML=list.map(s=>{
+    const nm=esc(s.full_name).replace(/'/g,'');
+    let period='<span style="color:var(--ink-3)">—</span>';
+    if(s.status==='active'||s.status==='frozen'||s.status==='expired'){
+      const dl=subDaysLeft(s);
+      if(s.status==='frozen'){
+        period=`<span class="pill pending" style="font-size:11px">⏸ Frozen</span>`+
+          (dl!=null?`<div style="font-size:10.5px;color:var(--ink-3);margin-top:3px;font-family:var(--ff-mono)">${dl}d remain</div>`:'');
+      }else if(s.status==='expired' || (dl!=null&&dl<0)){
+        period=`<span class="pill rejected" style="font-size:11px">○ Expired</span>`+
+          `<div style="font-size:10.5px;color:var(--ink-3);margin-top:3px;font-family:var(--ff-mono)">ended ${fmtDate(subEnd(s))}</div>`;
+      }else{
+        period=`<span class="pill approved" style="font-size:11px">● Live</span>`+
+          (dl!=null?`<div style="font-size:10.5px;color:${dl<=10?'var(--warn)':'var(--ink-3)'};margin-top:3px;font-family:var(--ff-mono)">${dl}d left</div>`:'');
+      }
+    }else if(s.status==='approved'){
+      period=`<span class="pill pending" style="font-size:11px">⏳ Awaiting Complete</span>`;
+    }
+    const actions = showArchived
+      ? `<button class="icon-btn ok" title="Restore" onclick="restoreSub('${s.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6M3 13a9 9 0 103-7.7L3 8"/></svg></button>
+         <button class="icon-btn no" title="Delete now" onclick="delSub('${s.id}','${nm}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>`
+      : `<button class="icon-btn" title="View" onclick="viewSub('${s.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+         <button class="icon-btn warn" title="Archive" onclick="archiveSub('${s.id}','${nm}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg></button>`;
+    const archiveNote = showArchived ? `<div style="font-size:10.5px;color:var(--warn);margin-top:3px;font-family:var(--ff-mono)">Auto-deletes in ${archiveDaysLeft(s)}d</div>` : '';
+    return `<tr>
+      <td style="font-weight:600">${esc(s.full_name)}<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-family:var(--ff-mono)">${fmtDate(s.created_at)}</div>${archiveNote}</td>
+      <td>${esc(s.plan)}</td><td>${esc(s.duration_months)} mo</td>
+      <td class="disp" style="font-family:var(--ff-mono)">${subAmt(s)}</td>
+      <td>${period}</td>
+      <td><span class="pill ${esc(s.status)}">${esc(s.status)}</span></td>
+      <td><div class="tbl-actions">${actions}</div></td></tr>`;
+  }).join('');
+}
+window.viewSub=id=>{
+  const s=SUBS.find(x=>x.id===id);if(!s)return;
+  document.getElementById('smName').textContent=s.full_name;
+  const active=subIsActive(s);const dl=subDaysLeft(s);
+  const rows=[['Plan',s.plan],['Duration',s.duration_months+' months'],['Amount',subAmt(s)],['Region',subCur(s)==='$'?'International':'Egypt'],['WhatsApp',s.whatsapp],['Discount',s.discount_code?s.discount_code+' (−'+s.discount_percent+'%)':'—'],['Requested',fmtDate(s.created_at)]];
+  if(s.status==='active'||s.status==='frozen'||s.status==='expired'){
+    rows.push(['Counter started',fmtDate(subActivated(s))]);
+    rows.push(['Ends',fmtDate(subEnd(s))]);
+    const dl2=subDaysLeft(s);
+    const lbl = s.status==='frozen' ? `⏸ Frozen${dl2!=null?' — '+dl2+' days remain':''}`
+              : s.status==='expired' ? '🔴 Expired'
+              : (dl2!=null&&dl2>=0?`🟢 Active — ${dl2} days left`:'🔴 Expired');
+    rows.push(['Subscription',lbl]);
+    if(Number(s.freeze_days||0)>0) rows.push(['Freeze days used',s.freeze_days]);
+  }else if(s.status==='approved'){
+    rows.push(['Subscription','⏳ Approved — counter starts when client is marked Complete']);
+  }
+  rows.push(['Approval status',s.status]);
+  document.getElementById('smGrid').innerHTML=rows.map(([k,v])=>`<div class="detail"><div class="k">${k}</div><div class="v">${esc(v||'—')}</div></div>`).join('');
+  const proofEl=document.getElementById('smProof');
+  if(s.payment_screenshot_url){
+    proofEl.innerHTML='<div class="detail"><div class="k">Payment proof</div><div class="v" style="color:var(--ink-3);font-size:12.5px">Loading…</div></div>';
+    (async()=>{
+      const u=await signedUrl(s.payment_screenshot_url,'payment-proofs',3600);
+      proofEl.innerHTML=u
+        ? `<div class="detail"><div class="k">Payment proof</div></div><a href="${u}" target="_blank"><img src="${u}" style="max-width:100%;border-radius:12px;border:1px solid var(--line);margin-top:8px"></a>`
+        : '<div class="detail"><div class="k">Payment proof</div><div class="v">Could not load image</div></div>';
+    })();
+  }else{
+    proofEl.innerHTML='<div class="detail"><div class="k">Payment proof</div><div class="v">Not uploaded</div></div>';
+  }
+  const a=document.getElementById('smActions');
+  const nmeSafe=esc(s.full_name).replace(/'/g,'');
+  let acts=`<a class="btn btn-ghost" href="https://wa.me/${waPhone(s.whatsapp)}" target="_blank">WhatsApp</a>`;
+  if(s.status==='pending'){
+    acts+=`<button class="btn btn-primary" onclick="setSubStatus('${s.id}','approved')">Approve</button>`;
+    acts+=`<button class="btn btn-ghost" style="border-color:var(--danger);color:var(--danger)" onclick="setSubStatus('${s.id}','rejected')">Reject</button>`;
+  }else if(s.status==='approved'){
+    acts+=`<span style="font-size:12px;color:var(--ink-3);align-self:center">Mark the client <b>Complete</b> to start the counter</span>`;
+    acts+=`<button class="btn btn-ghost" style="border-color:var(--danger);color:var(--danger)" onclick="setSubStatus('${s.id}','rejected')">Reject</button>`;
+  }else if(s.status==='active'){
+    acts+=`<button class="btn btn-ghost" style="border-color:var(--warn);color:var(--warn)" onclick="freezeSub('${s.id}')">⏸ Freeze</button>`;
+  }else if(s.status==='frozen'){
+    acts+=`<button class="btn btn-primary" onclick="unfreezeSub('${s.id}')">▶ Resume</button>`;
+  }else if(s.status==='expired'){
+    acts+=`<button class="btn btn-primary" onclick="renewSub('${s.id}')">🔄 Renew</button>`;
+  }
+  acts+=`<button class="btn btn-ghost" style="border-color:var(--warn);color:var(--warn)" onclick="archiveSub('${s.id}','${nmeSafe}')">Archive</button>`;
+  acts+=`<button class="btn btn-ghost" style="border-color:var(--danger);color:var(--danger)" onclick="delSub('${s.id}','${nmeSafe}')">Delete</button>`;
+  a.innerHTML=acts;
+  document.getElementById('subModal').classList.add('show');
+};
+window.setSubStatus=async(id,st)=>{
+  try{
+    // Approve = accept the payment. The counter does NOT start here — it starts
+    // only when the coach marks the linked client "Complete".
+    const {error}=await sb.from('subscriptions').update({status:st}).eq('id',id);
+    if(error) throw error;
+    document.getElementById('subModal').classList.remove('show');
+    toast('Subscription '+st,'ok');await loadSubs();renderClients();renderDash();
+  }catch(e){ toast('Could not update — '+errMsg(e),'err'); }
+};
+// Freeze: pause the counter. end_date stays; frozen_at records the pause moment.
+window.freezeSub=async id=>{
+  try{
+    const {error}=await sb.from('subscriptions').update({status:'frozen',frozen_at:new Date().toISOString()}).eq('id',id);
+    if(error) throw error;
+    document.getElementById('subModal').classList.remove('show');
+    toast('Subscription frozen','ok');await loadSubs();renderClients();renderDash();
+  }catch(e){ toast('Could not freeze — '+errMsg(e),'err'); }
+};
+// Unfreeze: add the frozen days back onto end_date and accumulate them in freeze_days.
+window.unfreezeSub=async id=>{
+  try{
+    const s=SUBS.find(x=>x.id===id); if(!s) return;
+    let addDays=0;
+    if(s.frozen_at){ addDays=Math.max(0,Math.round((new Date()-new Date(s.frozen_at))/(1000*60*60*24))); }
+    const newEnd = subEnd(s) ? new Date(subEnd(s)) : new Date();
+    newEnd.setDate(newEnd.getDate()+addDays);
+    const patch={status:'active',frozen_at:null,freeze_days:Number(s.freeze_days||0)+addDays,end_date:newEnd.toISOString().slice(0,10)};
+    const {error}=await sb.from('subscriptions').update(patch).eq('id',id);
+    if(error) throw error;
+    document.getElementById('subModal').classList.remove('show');
+    toast('Subscription resumed (+'+addDays+' days)','ok');await loadSubs();renderClients();renderDash();
+  }catch(e){ toast('Could not resume — '+errMsg(e),'err'); }
+};
+// Renew (for expired): fresh counter of the same duration, reset notification flags.
+window.renewSub=async id=>{
+  try{
+    const s=SUBS.find(x=>x.id===id); if(!s) return;
+    if(!confirm('Renew this subscription for another '+s.duration_months+' months?')) return;
+    const start=new Date(); const end=addMonths(start,s.duration_months);
+    const patch={status:'active',activated_at:start.toISOString(),start_date:start.toISOString().slice(0,10),end_date:end.toISOString().slice(0,10),frozen_at:null,freeze_days:0,notified_10d:false,notified_expired:false};
+    const {error}=await sb.from('subscriptions').update(patch).eq('id',id);
+    if(error) throw error;
+    document.getElementById('subModal').classList.remove('show');
+    toast('Subscription renewed','ok');await loadSubs();renderClients();renderDash();
+  }catch(e){ toast('Could not renew — '+errMsg(e),'err'); }
+};
+window.delSub=async(id,name)=>{
+  if(!confirm('Delete subscription for "'+(name||'')+'" permanently?\nThis cannot be undone.'))return;
+  await sb.from('subscriptions').delete().eq('id',id);
+  document.getElementById('subModal').classList.remove('show');
+  toast('Subscription deleted','ok');
+  await loadSubs();renderClients();renderDash();
+};
+window.archiveSub=async(id,name)=>{
+  if(!confirm('Archive subscription for "'+(name||'')+'"?\nIt will be hidden and auto-deleted after '+ARCHIVE_DAYS+' days. You can restore it before then.'))return;
+  await sb.from('subscriptions').update({archived_at:new Date().toISOString()}).eq('id',id);
+  document.getElementById('subModal').classList.remove('show');
+  toast('Subscription archived','ok');
+  await loadSubs();renderClients();renderDash();
+};
+window.restoreSub=async id=>{
+  await sb.from('subscriptions').update({archived_at:null}).eq('id',id);
+  toast('Subscription restored','ok');
+  await loadSubs();renderClients();renderDash();
+};
+document.getElementById('smClose').onclick=()=>document.getElementById('subModal').classList.remove('show');
+document.getElementById('subSearch').oninput=renderSubs;
+document.querySelectorAll('#subFilter button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#subFilter button').forEach(x=>x.classList.remove('active'));b.classList.add('active');subF=b.dataset.f;renderSubs();});
+
+/* ===== MANUAL ADD (WhatsApp clients) ===== */
+function normPhone(p){ let d=(''+(p||'')).replace(/\D/g,''); return d.slice(-10); } // last 10 digits
+const mmModal=document.getElementById('manualModal');
+document.getElementById('addManualBtn').onclick=()=>{
+  ['mm_name','mm_wa','mm_plan','mm_amount'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mm_months').value=3; document.getElementById('mm_activate').checked=true;
+  mmModal.classList.add('show');
+};
+document.getElementById('mmClose').onclick=()=>mmModal.classList.remove('show');
+document.getElementById('mmCancel').onclick=()=>mmModal.classList.remove('show');
+document.getElementById('mmSave').onclick=async()=>{
+  const name=document.getElementById('mm_name').value.trim();
+  const wa=document.getElementById('mm_wa').value.trim();
+  const plan=document.getElementById('mm_plan').value.trim();
+  const months=parseInt(document.getElementById('mm_months').value)||0;
+  const amount=parseFloat(document.getElementById('mm_amount').value)||0;
+  const region=document.getElementById('mm_region').value;
+  const activate=document.getElementById('mm_activate').checked;
+  if(!name||!wa||!plan||!months){toast('Fill name, WhatsApp, plan and duration','err');return;}
+  const btn=document.getElementById('mmSave'); btn.disabled=true; const t0=btn.textContent; btn.textContent='Saving…';
+  try{
+    // try to link an existing intake client with the same phone (last 10 digits)
+    let clientId=null;
+    const wn=normPhone(wa);
+    const match=CLIENTS.find(c=>normPhone(c.phone)===wn);
+    if(match) clientId=match.id;
+    const id=genId();
+    const payload={
+      id, full_name:name, whatsapp:wa, plan, duration_months:months,
+      amount_egp:amount, currency:region==='intl'?'$':'EGP', region,
+      status:'pending', source:'manual'
+    };
+    if(clientId) payload.client_id=clientId;
+    if(activate){
+      const start=new Date(); const end=addMonths(start,months);
+      payload.status='active'; payload.activated_at=start.toISOString();
+      payload.start_date=start.toISOString().slice(0,10); payload.end_date=end.toISOString().slice(0,10);
+    }
+    const {error}=await sb.from('subscriptions').insert(payload);
+    if(error) throw error;
+    mmModal.classList.remove('show');
+    toast(activate?'Subscription added & activated'+(match?' · linked to intake':''):'Subscription added'+(match?' · linked to intake':''),'ok');
+    await loadSubs(); renderClients(); renderDash();
+  }catch(e){ toast('Could not add — '+errMsg(e),'err'); }
+  finally{ btn.disabled=false; btn.textContent=t0; }
+};
+
+/* ===== PLANS ===== */
+async function loadPlans(){
+  const {data}=await sb.from('plans').select('*').order('id');
+  PLANS=data||[];renderPlans();
+}
+document.querySelectorAll('#planRegionTab button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#planRegionTab button').forEach(x=>x.classList.remove('active'));b.classList.add('active');planRegion=b.dataset.r;renderPlans();});
+function renderPlans(){
+  const g=document.getElementById('plansGrid');
+  const list=PLANS.filter(p=>(p.region||'eg')===planRegion);
+  if(!list.length){g.innerHTML='<div class="empty">No plans for this region</div>';return;}
+  const sym=planRegion==='intl'?'$':'EGP';
+  g.innerHTML=list.map(p=>`<div class="pcard" data-id="${p.id}">
+    <h3>${esc(p.plan_name)}</h3><div class="rk">${esc(p.plan_key)} · ${sym}</div>
+    ${p.price_3m!=null?field(p.id,'price_3m','3 Months',p.price_3m):''}
+    ${field(p.id,'price_6m','6 Months',p.price_6m)}
+    ${field(p.id,'price_12m','12 Months',p.price_12m)}
+    <div class="pr-field"><label>Discount %</label><input type="number" data-f="discount_percent" data-id="${p.id}" value="${p.discount_percent||0}"></div>
+  </div>`).join('');
+}
+function field(id,f,label,val){return `<div class="pr-field"><label>${label}</label><input type="number" data-f="${f}" data-id="${id}" value="${val==null?'':val}"></div>`;}
+document.getElementById('savePlans').onclick=async()=>{
+  const updates={};
+  document.querySelectorAll('#plansGrid input').forEach(i=>{const id=i.dataset.id;updates[id]=updates[id]||{};updates[id][i.dataset.f]=i.value===''?null:Number(i.value);});
+  for(const id in updates){await sb.from('plans').update(updates[id]).eq('id',id);}
+  toast('Prices saved','ok');await loadPlans();
+};
+
+/* ===== TRANSFORMATIONS (before + after, with crop/zoom/drag) ===== */
+let TRANSFORMS=[];
+async function loadTransforms(){const {data}=await sb.from('transformations').select('*').order('display_order');TRANSFORMS=data||[];renderResults();}
+function renderResults(){
+  const g=document.getElementById('resultsGrid');
+  g.innerHTML=TRANSFORMS.map(t=>`<div class="ba-card">
+      <button class="del" onclick="delTransform('${t.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>
+      <div class="ba-imgs">
+        <figure><figcaption>BEFORE</figcaption><img src="${t.before_url}"></figure>
+        <figure><figcaption>AFTER</figcaption><img src="${t.after_url}"></figure>
+      </div>
+    </div>`).join('');
+  if(!TRANSFORMS.length)g.innerHTML=`<div class="empty" style="grid-column:1/-1">No transformations yet — click "Add Transformation".</div>`;
+}
+
+// ---- Cropper engine (3:4 output) ----
+function makeCropper(key){
+  const cropper=document.getElementById('crop'+key);           // container
+  const canvas=document.getElementById('canvas'+key);
+  const zoom=document.getElementById('zoom'+key);
+  const changeBtn=document.getElementById('change'+key);
+  const fileInput=document.getElementById('tf'+key);           // tfBefore / tfAfter
+  const ctx=canvas.getContext('2d');
+  const state={img:null,scale:1,minScale:1,x:0,y:0,drag:false,lx:0,ly:0};
+  const OUT_W=600, OUT_H=800;                                  // 3:4
+  canvas.width=OUT_W; canvas.height=OUT_H;
+
+  function clamp(){
+    const iw=state.img.width*state.scale, ih=state.img.height*state.scale;
+    // keep image covering the frame
+    state.x=Math.min(0,Math.max(OUT_W-iw,state.x));
+    state.y=Math.min(0,Math.max(OUT_H-ih,state.y));
+  }
+  function draw(){
+    if(!state.img)return;
+    ctx.clearRect(0,0,OUT_W,OUT_H);
+    ctx.fillStyle='#0A0C0F';ctx.fillRect(0,0,OUT_W,OUT_H);
+    ctx.drawImage(state.img,state.x,state.y,state.img.width*state.scale,state.img.height*state.scale);
+  }
+  function loadImg(file){
+    const img=new Image();
+    img.onload=()=>{
+      state.img=img;
+      // min scale = cover the 3:4 frame fully (so whole frame filled, but coach can zoom out to this baseline)
+      state.minScale=Math.max(OUT_W/img.width,OUT_H/img.height);
+      state.scale=state.minScale;
+      zoom.min=state.minScale.toFixed(3);
+      zoom.max=(state.minScale*3).toFixed(3);
+      zoom.step=((state.minScale*2)/100).toFixed(4);
+      zoom.value=state.minScale;
+      // center
+      state.x=(OUT_W-img.width*state.scale)/2;
+      state.y=(OUT_H-img.height*state.scale)/2;
+      clamp();draw();
+      cropper.dataset.empty='0';
+      zoom.style.display='block';changeBtn.style.display='block';
+    };
+    img.src=URL.createObjectURL(file);
+  }
+  fileInput.onchange=e=>{const f=e.target.files[0];if(f)loadImg(f);};
+  changeBtn.onclick=()=>fileInput.click();
+  zoom.oninput=()=>{
+    const old=state.scale;state.scale=parseFloat(zoom.value);
+    // zoom around center
+    const cx=OUT_W/2,cy=OUT_H/2;
+    state.x=cx-((cx-state.x)/old)*state.scale;
+    state.y=cy-((cy-state.y)/old)*state.scale;
+    clamp();draw();
+  };
+  // drag
+  function down(e){state.drag=true;const p=pt(e);state.lx=p.x;state.ly=p.y;}
+  function move(e){if(!state.drag)return;const p=pt(e);state.x+=(p.x-state.lx);state.y+=(p.y-state.ly);state.lx=p.x;state.ly=p.y;clamp();draw();}
+  function up(){state.drag=false;}
+  function pt(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return {x:(t.clientX-r.left)*(OUT_W/r.width),y:(t.clientY-r.top)*(OUT_H/r.height)};}
+  canvas.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+  canvas.addEventListener('touchstart',e=>{down(e);},{passive:true});
+  canvas.addEventListener('touchmove',e=>{move(e);e.preventDefault();},{passive:false});
+  canvas.addEventListener('touchend',up);
+  return {
+    hasImage:()=>!!state.img,
+    reset:()=>{state.img=null;cropper.dataset.empty='1';zoom.style.display='none';changeBtn.style.display='none';fileInput.value='';ctx.clearRect(0,0,OUT_W,OUT_H);},
+    toBlob:()=>new Promise(res=>canvas.toBlob(b=>res(b),'image/jpeg',0.9))
+  };
+}
+let cropB=null, cropA=null;
+document.getElementById('openTfModal').onclick=()=>{
+  document.getElementById('tfModal').classList.add('show');
+  if(!cropB)cropB=makeCropper('Before');
+  if(!cropA)cropA=makeCropper('After');
+  cropB.reset();cropA.reset();
+};
+document.getElementById('tfClose').onclick=()=>document.getElementById('tfModal').classList.remove('show');
+document.getElementById('tfSave').onclick=async()=>{
+  if(!cropB||!cropA||!cropB.hasImage()||!cropA.hasImage()){toast('Upload both before and after','err');return;}
+  toast('Uploading…');
+  try{
+    const bBlob=await cropB.toBlob(), aBlob=await cropA.toBlob();
+    const up=async(blob,tag)=>{const fn=tag+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)+'.jpg';const {error}=await sb.storage.from('site-media').upload(fn,blob,{contentType:'image/jpeg'});if(error)throw error;return sb.storage.from('site-media').getPublicUrl(fn).data.publicUrl;};
+    const beforeUrl=await up(bBlob,'before');
+    const afterUrl=await up(aBlob,'after');
+    await sb.from('transformations').insert({before_url:beforeUrl,after_url:afterUrl,display_order:TRANSFORMS.length});
+    document.getElementById('tfModal').classList.remove('show');
+    toast('Transformation added','ok');await loadTransforms();
+  }catch(e){toast('Upload failed — '+errMsg(e),'err');}
+};
+window.delTransform=async id=>{if(!confirm('Delete this transformation?'))return;await sb.from('transformations').delete().eq('id',id);toast('Deleted','ok');await loadTransforms();};
+
+/* ===== REVIEWS ===== */
+let REVIEWS=[];
+async function loadReviews(){const {data}=await sb.from('reviews').select('*').order('display_order');REVIEWS=data||[];renderReviews();}
+function renderReviews(){
+  const g=document.getElementById('reviewsGrid');
+  g.innerHTML=REVIEWS.map(r=>`<div class="media-card"><img src="${r.image_url}"><button class="del" onclick="delReview('${r.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button></div>`).join('')
+    +`<div class="add-media" onclick="document.getElementById('reviewFile').click()"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span style="margin-top:8px;font-size:13px">Add review</span></div>`;
+}
+document.getElementById('reviewFile').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;toast('Uploading…');
+  const fn='rv_'+Date.now()+'.jpg';const {error}=await sb.storage.from('site-media').upload(fn,f);
+  if(error){toast('Upload failed — '+errMsg(error),'err');return;}
+  const {data}=sb.storage.from('site-media').getPublicUrl(fn);
+  await sb.from('reviews').insert({image_url:data.publicUrl,display_order:REVIEWS.length});
+  toast('Added','ok');await loadReviews();e.target.value='';
+};
+window.delReview=async id=>{if(!confirm('Delete this review?'))return;await sb.from('reviews').delete().eq('id',id);toast('Deleted','ok');await loadReviews();};
+
+/* ===== CODES ===== */
+function codePlanLabel(pk){
+  if(!pk) return 'All plans';
+  const [reg,plan]=pk.split(':');
+  const regTxt = reg==='eg'?'🇪🇬 Egypt':reg==='intl'?'🌍 Intl':pk;
+  if(!plan) return regTxt+' (all)';
+  const planTxt = plan==='basic'?'Basic':plan==='pro'?'Pro':plan==='elite'?'Elite':plan;
+  return regTxt+' · '+planTxt;
+}
+async function loadCodes(){const {data}=await sb.from('discount_codes').select('*').order('created_at',{ascending:false});CODES=data||[];renderCodes();}
+function renderCodes(){
+  const b=document.getElementById('codesBody');
+  if(!CODES.length){b.innerHTML=`<tr><td colspan="7"><div class="empty">No codes yet</div></td></tr>`;return;}
+  b.innerHTML=CODES.map(c=>`<tr>
+    <td class="disp" style="font-family:var(--ff-mono);font-weight:600">${esc(c.code)}</td><td>${c.discount_percent}%</td>
+    <td style="font-size:12.5px">${esc(codePlanLabel(c.plan_key))}</td><td>${c.expiry_date||'—'}</td><td>${c.used_count||0}</td>
+    <td><span class="pill ${c.is_active?'approved':'rejected'}">${c.is_active?'active':'off'}</span></td>
+    <td><div class="tbl-actions">
+      <button class="icon-btn" onclick="toggleCode('${c.id}',${!c.is_active})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10"/></svg></button>
+      <button class="icon-btn no" onclick="delCode('${c.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+    </div></td></tr>`).join('');
+}
+document.getElementById('createCode').onclick=async()=>{
+  const code=document.getElementById('c_code').value.trim().toUpperCase();
+  if(!code){toast('Enter a code','err');return;}
+  const pct=parseInt(document.getElementById('c_pct').value)||10;
+  const exp=document.getElementById('c_exp').value||null;
+  const plan=document.getElementById('c_plan').value||null;
+  const {error}=await sb.from('discount_codes').insert({code,discount_percent:pct,expiry_date:exp,plan_key:plan,is_active:true});
+  if(error){toast('Could not save code — '+errMsg(error),'err');return;}
+  document.getElementById('c_code').value='';toast('Code created','ok');await loadCodes();
+};
+window.toggleCode=async(id,st)=>{await sb.from('discount_codes').update({is_active:st}).eq('id',id);await loadCodes();};
+window.delCode=async id=>{if(!confirm('Delete code?'))return;await sb.from('discount_codes').delete().eq('id',id);toast('Deleted','ok');await loadCodes();};
+
+/* ===== SETTINGS ===== */
+async function loadSettings(){
+  const {data}=await sb.from('site_settings').select('*');
+  SETTINGS={};(data||[]).forEach(s=>SETTINGS[s.key]=s.value);
+  document.getElementById('s_clients').value=SETTINGS.total_clients||'';
+  document.getElementById('s_years').value=SETTINGS.years_experience||'';
+  updateVideoState();
+}
+function updateVideoState(){
+  const has=!!(SETTINGS.explainer_video_url&&SETTINGS.explainer_video_url.trim());
+  const st=document.getElementById('videoState');
+  const rm=document.getElementById('videoRemoveBtn');
+  const up=document.getElementById('videoUploadBtn');
+  if(st) st.textContent=has?'✅ Video live on homepage':'No video uploaded';
+  if(st) st.style.color=has?'var(--accent)':'var(--ink-3)';
+  if(rm) rm.style.display=has?'block':'none';
+  if(up) up.textContent=has?'Replace video':'Upload video';
+}
+document.getElementById('videoUploadBtn').onclick=()=>document.getElementById('videoFile').click();
+document.getElementById('videoFile').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const MAX=50*1024*1024;
+  if(f.size>MAX){ toast('File is '+(f.size/1048576|0)+'MB — the limit is 50MB. Compress it first.','err'); e.target.value=''; return; }
+  const btn=document.getElementById('videoUploadBtn'); btn.disabled=true; const t0=btn.textContent; btn.textContent='⏳ Uploading… ('+(f.size/1048576|0)+'MB)';
+  try{
+    const ext=(f.name.split('.').pop()||'mp4').toLowerCase();
+    const fn='explainer_'+Date.now()+'.'+ext;
+    const {error}=await sb.storage.from('site-media').upload(fn,f,{contentType:f.type||'video/mp4',upsert:true});
+    if(error) throw error;
+    const url=sb.storage.from('site-media').getPublicUrl(fn).data.publicUrl;
+    const {error:e2}=await sb.from('site_settings').upsert({key:'explainer_video_url',value:url});
+    if(e2) throw e2;
+    SETTINGS.explainer_video_url=url; updateVideoState();
+    toast('Video uploaded — now live on the homepage','ok');
+  }catch(err){ toast('Upload failed — '+errMsg(err),'err'); }
+  finally{ btn.disabled=false; btn.textContent=t0; e.target.value=''; }
+};
+document.getElementById('videoRemoveBtn').onclick=async()=>{
+  if(!confirm('Remove the explainer video from the homepage?')) return;
+  try{
+    const {error}=await sb.from('site_settings').upsert({key:'explainer_video_url',value:''});
+    if(error) throw error;
+    SETTINGS.explainer_video_url=''; updateVideoState();
+    toast('Video removed','ok');
+  }catch(err){ toast('Could not remove — '+errMsg(err),'err'); }
+};
+document.getElementById('saveSettings').onclick=async()=>{
+  const rows=[['total_clients',document.getElementById('s_clients').value],['years_experience',document.getElementById('s_years').value]];
+  for(const [k,v] of rows){await sb.from('site_settings').upsert({key:k,value:''+v});}
+  toast('Settings saved','ok');
+};
+
+/* ===== CHANGE PASSWORD ===== */
+// Show which account is signed in
+(async()=>{
+  try{
+    const {data}=await sb.auth.getUser();
+    const el=document.getElementById('pwAccount');
+    if(el&&data&&data.user&&data.user.email) el.textContent='Signed in as '+data.user.email;
+  }catch(e){}
+})();
+
+function passwordIssues(pw){
+  const issues=[];
+  if(pw.length<10) issues.push('at least 10 characters');
+  if(!/[a-z]/.test(pw)||!/[A-Z]/.test(pw)) issues.push('upper & lower case');
+  if(!/[0-9]/.test(pw)) issues.push('a number');
+  return issues;
+}
+const pwNewEl=document.getElementById('pw_new');
+if(pwNewEl){
+  pwNewEl.addEventListener('input',()=>{
+    const v=pwNewEl.value, el=document.getElementById('pwStrength');
+    if(!v){el.textContent='';return;}
+    const issues=passwordIssues(v);
+    if(issues.length){el.style.color='var(--warn)';el.textContent='Needs: '+issues.join(', ');}
+    else{el.style.color='var(--ok)';el.textContent='✓ Strong enough';}
+  });
+}
+
+document.getElementById('changePwBtn').onclick=async()=>{
+  const oldPw=document.getElementById('pw_old').value;
+  const newPw=document.getElementById('pw_new').value;
+  const newPw2=document.getElementById('pw_new2').value;
+  const msg=document.getElementById('pwMsg');
+  const btn=document.getElementById('changePwBtn');
+  const fail=t=>{msg.style.color='var(--danger)';msg.textContent=t;};
+  msg.textContent='';
+
+  if(!oldPw||!newPw||!newPw2){fail('Please fill all three fields.');return;}
+  if(newPw!==newPw2){fail('New passwords do not match.');return;}
+  if(newPw===oldPw){fail('New password must be different from the current one.');return;}
+  const issues=passwordIssues(newPw);
+  if(issues.length){fail('Password too weak — needs '+issues.join(', ')+'.');return;}
+
+  btn.disabled=true;btn.textContent='Updating…';
+  try{
+    // 1) Verify the CURRENT password by re-authenticating.
+    //    Supabase does not check the old password on update, so without this
+    //    anyone using an unlocked screen could change it.
+    const {data:u}=await sb.auth.getUser();
+    const email=u&&u.user?u.user.email:null;
+    if(!email){fail('Could not read your account. Sign out and in again.');btn.disabled=false;btn.textContent='Update Password';return;}
+
+    const {error:authErr}=await sb.auth.signInWithPassword({email,password:oldPw});
+    if(authErr){fail('Current password is incorrect.');btn.disabled=false;btn.textContent='Update Password';return;}
+
+    // 2) Set the new password
+    const {error:updErr}=await sb.auth.updateUser({password:newPw});
+    if(updErr){fail(updErr.message||'Could not update password.');btn.disabled=false;btn.textContent='Update Password';return;}
+
+    msg.style.color='var(--ok)';msg.textContent='Password updated successfully.';
+    document.getElementById('pw_old').value='';
+    document.getElementById('pw_new').value='';
+    document.getElementById('pw_new2').value='';
+    document.getElementById('pwStrength').textContent='';
+    toast('Password changed','ok');
+    btn.disabled=false;btn.textContent='Update Password';
+  }catch(e){
+    fail('Something went wrong. Please try again.');
+    btn.disabled=false;btn.textContent='Update Password';
+  }
+};
+
+/* ===== DASHBOARD ===== */
+function renderDash(){
+  const clients=CLIENTS.filter(c=>!isArchived(c));
+  const subs=SUBS.filter(s=>!isArchived(s));
+  document.getElementById('stClients').textContent=fmt(clients.length);
+  document.getElementById('stActive').textContent=fmt(subs.filter(s=>subIsActive(s)).length);
+  document.getElementById('stPending').textContent=fmt(subs.filter(s=>s.status==='pending').length);
+  document.getElementById('stInProgress').textContent=fmt(clients.filter(c=>(c.status||'new')==='in_progress').length);
+  const expiring=subs.filter(s=>{const dl=subIsActive(s)?subDaysLeft(s):null;return dl!=null&&dl<=7&&dl>=0;}).length;
+  document.getElementById('stExpiring').textContent=fmt(expiring);
+  const revEg=subs.filter(s=>s.status==='approved'&&subCur(s)==='EGP').reduce((a,s)=>a+Number(s.amount_egp||0),0);
+  const revUsd=subs.filter(s=>s.status==='approved'&&subCur(s)==='$').reduce((a,s)=>a+Number(s.amount_egp||0),0);
+  document.getElementById('stRevEg').textContent=fmt(revEg);
+  document.getElementById('stRevUsd').textContent='$'+fmt(revUsd);
+  document.getElementById('stCodes').textContent=fmt(CODES.filter(c=>c.is_active).length);
+}
+
+/* lazy-load media views on first open */
+document.querySelector('.nav-item[data-view="results"]').addEventListener('click',()=>{if(!TRANSFORMS.length)loadTransforms();},{once:true});
+document.querySelector('.nav-item[data-view="reviews"]').addEventListener('click',()=>{if(!REVIEWS.length)loadReviews();},{once:true});
+
+/* ============================================================
+   PROGRAMS MODULE — Diet + Workout builder (integrated in admin)
+   Key fix: typing NEVER re-renders inputs (no focus loss).
+   Rows are built once; edits update the data model + totals only.
+   ============================================================ */
+(function(){
+const SEED_FOODS = {"بروتين": [{"n": "صدور دجاج (نيء)", "cal": 120, "p": 22.5, "c": 0.0, "f": 2.6, "src": "USDA 171077"}, {"n": "صدور دجاج (مشوي)", "cal": 165, "p": 31.0, "c": 0.0, "f": 3.6, "src": "USDA 171534"}, {"n": "لحم بقري قليل الدهن 95%", "cal": 137, "p": 21.4, "c": 0.0, "f": 5.0, "src": "USDA 174036"}, {"n": "سمك بلطي (فيليه)", "cal": 96, "p": 20.1, "c": 0.0, "f": 1.7, "src": "USDA 175177"}, {"n": "سمك أبيض (قدّ)", "cal": 82, "p": 17.8, "c": 0.0, "f": 0.7, "src": "USDA 171955"}, {"n": "جمبري (نيء)", "cal": 85, "p": 20.1, "c": 0.0, "f": 0.5, "src": "USDA 175179"}, {"n": "تونة معلبة بالماء", "cal": 86, "p": 19.4, "c": 0.0, "f": 1.0, "src": "USDA 175159"}, {"n": "بيض كامل", "cal": 143, "p": 12.6, "c": 0.7, "f": 9.5, "src": "USDA 748967"}, {"n": "بياض بيض", "cal": 52, "p": 10.9, "c": 0.7, "f": 0.2, "src": "USDA 747997"}, {"n": "جبنة قريش قليلة الدسم", "cal": 72, "p": 12.4, "c": 2.7, "f": 1.0, "src": "USDA 173420"}, {"n": "زبادي يوناني (0%)", "cal": 59, "p": 10.2, "c": 3.6, "f": 0.4, "src": "USDA 170903"}, {"n": "ترمس مسلوق", "cal": 119, "p": 15.6, "c": 9.9, "f": 2.9, "src": "USDA 172427"}, {"n": "عدس مسلوق", "cal": 116, "p": 9.0, "c": 20.1, "f": 0.4, "src": "USDA 172420"}, {"n": "واي بروتين (باودر)", "cal": 400, "p": 80.0, "c": 8.0, "f": 6.0, "src": "متوسط تجاري"}], "نشويات": [{"n": "شوفان (جاف)", "cal": 389, "p": 16.9, "c": 66.3, "f": 6.9, "src": "USDA 169705"}, {"n": "رز أبيض (مطبوخ)", "cal": 130, "p": 2.7, "c": 28.2, "f": 0.3, "src": "USDA 169756"}, {"n": "رز بني (مطبوخ)", "cal": 123, "p": 2.7, "c": 25.6, "f": 1.0, "src": "USDA 168880"}, {"n": "مكرونة (مطبوخة)", "cal": 158, "p": 5.8, "c": 30.9, "f": 0.9, "src": "USDA 168927"}, {"n": "بطاطس (نيئة)", "cal": 77, "p": 2.0, "c": 17.5, "f": 0.1, "src": "USDA 170026"}, {"n": "بطاطا (نيئة)", "cal": 86, "p": 1.6, "c": 20.1, "f": 0.1, "src": "USDA 168482"}, {"n": "خبز أسمر (توست)", "cal": 254, "p": 12.3, "c": 43.3, "f": 3.4, "src": "USDA 172686"}, {"n": "عيش بلدي", "cal": 275, "p": 9.1, "c": 55.0, "f": 1.2, "src": "تقديري محلي"}, {"n": "كورن فليكس", "cal": 357, "p": 7.5, "c": 84.0, "f": 0.4, "src": "USDA 173250"}, {"n": "تمر", "cal": 282, "p": 2.5, "c": 75.0, "f": 0.4, "src": "USDA 168191"}, {"n": "زبيب", "cal": 299, "p": 3.1, "c": 79.2, "f": 0.5, "src": "USDA 168165"}], "دهون": [{"n": "زبدة فول سوداني", "cal": 588, "p": 25.1, "c": 19.6, "f": 50.4, "src": "USDA 172470"}, {"n": "لوز", "cal": 579, "p": 21.2, "c": 21.6, "f": 49.9, "src": "USDA 170567"}, {"n": "عين جمل", "cal": 654, "p": 15.2, "c": 13.7, "f": 65.2, "src": "USDA 170187"}, {"n": "زيت زيتون", "cal": 884, "p": 0.0, "c": 0.0, "f": 100.0, "src": "USDA 171413"}, {"n": "سمسم (طحينة)", "cal": 595, "p": 17.0, "c": 21.2, "f": 53.8, "src": "USDA 168604"}, {"n": "أفوكادو", "cal": 160, "p": 2.0, "c": 8.5, "f": 14.7, "src": "USDA 171705"}], "فواكه": [{"n": "موز", "cal": 89, "p": 1.1, "c": 22.8, "f": 0.3, "src": "USDA 173944"}, {"n": "تفاح", "cal": 52, "p": 0.3, "c": 13.8, "f": 0.2, "src": "USDA 171688"}, {"n": "برتقال", "cal": 47, "p": 0.9, "c": 11.8, "f": 0.1, "src": "USDA 169097"}, {"n": "فراولة", "cal": 32, "p": 0.7, "c": 7.7, "f": 0.3, "src": "USDA 167762"}, {"n": "بطيخ", "cal": 30, "p": 0.6, "c": 7.6, "f": 0.2, "src": "USDA 167765"}, {"n": "عنب", "cal": 69, "p": 0.7, "c": 18.1, "f": 0.2, "src": "USDA 174683"}], "خضروات": [{"n": "خيار", "cal": 15, "p": 0.7, "c": 3.6, "f": 0.1, "src": "USDA 168409"}, {"n": "فلفل ألوان", "cal": 31, "p": 1.0, "c": 6.0, "f": 0.3, "src": "USDA 170108"}, {"n": "جزر", "cal": 41, "p": 0.9, "c": 9.6, "f": 0.2, "src": "USDA 170393"}, {"n": "خس", "cal": 15, "p": 1.4, "c": 2.9, "f": 0.2, "src": "USDA 169247"}, {"n": "طماطم", "cal": 18, "p": 0.9, "c": 3.9, "f": 0.2, "src": "USDA 170457"}, {"n": "بروكلي", "cal": 34, "p": 2.8, "c": 6.6, "f": 0.4, "src": "USDA 170379"}], "ألبان": [{"n": "حليب خالي الدسم", "cal": 34, "p": 3.4, "c": 5.0, "f": 0.1, "src": "USDA 746776"}, {"n": "حليب كامل الدسم", "cal": 61, "p": 3.2, "c": 4.8, "f": 3.3, "src": "USDA 746782"}, {"n": "زبادي عادي", "cal": 61, "p": 3.5, "c": 4.7, "f": 3.3, "src": "USDA 171284"}]} ;
+
+const LS_FOODS='as_custom_foods_v1', LS_EX='as_saved_exercises_v1', LS_DELFOODS='as_deleted_foods_v1';
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k))||null}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+let CUSTOM=lsGet(LS_FOODS)||{};
+let SAVED_EX=lsGet(LS_EX)||[];  // [{name,link}]
+let DELETED_FOODS=lsGet(LS_DELFOODS)||[];  // ["اسم الصنف",...] — USDA items the coach removed
+
+function allFoods(){const o={};for(const[c,a]of Object.entries(SEED_FOODS)){const kept=a.filter(f=>!DELETED_FOODS.includes(f.n));if(kept.length)o[c]=kept.map(f=>({...f,custom:false}))}for(const[c,a]of Object.entries(CUSTOM)){if(!o[c])o[c]=[];a.forEach(f=>o[c].push({...f,custom:true}))}return o}
+let FOODS={},FIDX={};
+function reindex(){FOODS=allFoods();FIDX={};Object.entries(FOODS).forEach(([c,a])=>a.forEach(f=>FIDX[f.n]={...f,cat:c}))}
+reindex();
+const r0=n=>Math.round(n),r1=n=>Math.round(n*10)/10;
+function pesc(s){return(s==null?'':''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function pbToast(m,t){if(window.toast){toast(m,t||'ok')}else{alert(m)}}
+
+/* ---------- STATE ---------- */
+let lang='ar';
+let meals=[],mSeq=0,iSeq=0,aSeq=0;
+let days=[],dSeq=0,exSeq=0;
+let pbTab='diet';
+
+function newAlt(){return{id:++aSeq,food:'',qty:0}}
+function newItem(){return{id:++iSeq,food:'',qty:100,alts:[]}}
+function newMeal(name){return{id:++mSeq,name:name||('الوجبة '+(meals.length+1)),items:[newItem()]}}
+function newEx(){return{id:++exSeq,name:'',link:'',sets:'',reps:'',rir:'',note:''}}
+function newDay(name){return{id:++dSeq,name:name||('اليوم '+(days.length+1)),focus:'',exercises:[newEx()]}}
+
+/* ---------- MACRO CALC ---------- */
+function itemMacros(it){const f=FIDX[it.food];if(!f)return{cal:0,p:0,c:0,f:0};const k=it.qty/100;return{cal:f.cal*k,p:f.p*k,c:f.c*k,f:f.f*k}}
+function mealMacros(m){return m.items.reduce((a,it)=>{const x=itemMacros(it);return{cal:a.cal+x.cal,p:a.p+x.p,c:a.c+x.c,f:a.f+x.f}},{cal:0,p:0,c:0,f:0})}
+function dayMacros(){return meals.reduce((a,m)=>{const x=mealMacros(m);return{cal:a.cal+x.cal,p:a.p+x.p,c:a.c+x.c,f:a.f+x.f}},{cal:0,p:0,c:0,f:0})}
+
+/* ============================================================
+   DIET RENDER — structure built once per meal; light updates after
+   ============================================================ */
+function foodOptions(sel){let h='<option value="">— اختر الصنف —</option>';for(const[cat,arr]of Object.entries(FOODS)){h+='<optgroup label="'+pesc(cat)+'">';arr.forEach(f=>{h+='<option '+(f.n===sel?'selected':'')+'>'+pesc(f.n)+'</option>'});h+='</optgroup>'}return h}
+
+function pbRenderDiet(){
+  const box=document.getElementById('pb_meals');if(!box)return;
+  box.innerHTML='';
+  meals.forEach((m,mi)=>{
+    const el=document.createElement('div');el.className='pb-block';el.dataset.meal=m.id;
+    const head=document.createElement('div');head.className='pb-block-head';
+    head.innerHTML='<div class="pb-num">'+(mi+1)+'</div>';
+    const nameIn=document.createElement('input');nameIn.className='pb-name';nameIn.value=m.name;nameIn.placeholder='اسم الوجبة';
+    nameIn.addEventListener('input',e=>{m.name=e.target.value});  // NO re-render
+    head.appendChild(nameIn);
+    const meta=document.createElement('span');meta.className='pb-meta';meta.dataset.mealmeta=m.id;head.appendChild(meta);
+    const xb=document.createElement('button');xb.className='pb-x';xb.innerHTML=delSVG();xb.onclick=()=>{meals=meals.filter(x=>x.id!==m.id);pbRenderDiet()};head.appendChild(xb);
+    el.appendChild(head);
+    const inner=document.createElement('div');inner.className='pb-inner';
+    const headRow=document.createElement('div');headRow.className='pb-drow h';
+    headRow.innerHTML='<span>الصنف</span><span>كمية جم</span><span>سعرات</span><span>بروتين</span><span>كارب</span><span>دهون</span><span></span>';
+    inner.appendChild(headRow);
+    m.items.forEach(it=>inner.appendChild(buildDietRow(m,it)));
+    const addBtn=document.createElement('button');addBtn.className='pb-add';addBtn.textContent='+ إضافة صنف';
+    addBtn.onclick=()=>{m.items.push(newItem());pbRenderDiet()};
+    inner.appendChild(addBtn);
+    el.appendChild(inner);
+    box.appendChild(el);
+  });
+  if(!meals.length)box.innerHTML='<p class="pb-empty">مفيش وجبات — اضغط «إضافة وجبة».</p>';
+  updateDietTotals();
+}
+
+function buildDietRow(m,it){
+  const row=document.createElement('div');row.className='pb-drow';row.dataset.item=it.id;
+  // food select
+  const sel=document.createElement('select');sel.className='pb-sel';sel.innerHTML=foodOptions(it.food);
+  sel.addEventListener('change',e=>{it.food=e.target.value;refreshRowMacros(m,it,row);updateDietTotals();rebuildAlts(m,it,row)});
+  row.appendChild(sel);
+  // qty
+  const qty=document.createElement('input');qty.className='pb-q';qty.type='number';qty.min='0';qty.value=it.qty;
+  qty.addEventListener('input',e=>{it.qty=parseFloat(e.target.value)||0;refreshRowMacros(m,it,row);updateDietTotals()}); // NO re-render
+  row.appendChild(qty);
+  // macro cells
+  ['cal','p','c','f'].forEach(k=>{const s=document.createElement('span');s.className='pb-mc'+(k==='cal'?' cal':'');s.dataset.mc=k;s.dataset.l=({cal:'سعرات',p:'بروتين',c:'كارب',f:'دهون'})[k];row.appendChild(s)});
+  // delete
+  const xb=document.createElement('button');xb.className='pb-x';xb.innerHTML=delSVG();
+  xb.onclick=()=>{m.items=m.items.filter(x=>x.id!==it.id);if(!m.items.length)m.items.push(newItem());pbRenderDiet()};
+  row.appendChild(xb);
+  // alternatives container (manual)
+  const altWrap=document.createElement('div');altWrap.className='pb-alts';altWrap.dataset.alts=it.id;row.appendChild(altWrap);
+  refreshRowMacros(m,it,row);
+  rebuildAlts(m,it,row);
+  return row;
+}
+
+function refreshRowMacros(m,it,row){
+  const x=itemMacros(it);
+  const map={cal:r0(x.cal),p:r1(x.p),c:r1(x.c),f:r1(x.f)};
+  row.querySelectorAll('[data-mc]').forEach(s=>s.textContent=map[s.dataset.mc]);
+}
+
+/* manual alternatives: user picks alt food + weight (no calorie calc) */
+function rebuildAlts(m,it,row){
+  const wrap=row.querySelector('[data-alts="'+it.id+'"]');if(!wrap)return;
+  wrap.innerHTML='';
+  if(!it.food){return}
+  const line=document.createElement('div');line.className='pb-alt-add';
+  it.alts.forEach(alt=>{
+    const chip=document.createElement('span');chip.className='pb-alt-chip';
+    chip.innerHTML='بديل: <b>'+pesc(alt.food||'—')+'</b> '+(alt.qty?('· '+r0(alt.qty)+'g'):'');
+    const rm=document.createElement('span');rm.className='rm';rm.textContent='✕';
+    rm.onclick=()=>{it.alts=it.alts.filter(a=>a.id!==alt.id);rebuildAlts(m,it,row)};
+    chip.appendChild(rm);line.appendChild(chip);
+  });
+  const addBtn=document.createElement('button');addBtn.className='pb-alt-btn';addBtn.textContent='+ بديل';
+  addBtn.onclick=()=>{openAltPicker(m,it,row)};
+  line.appendChild(addBtn);
+  wrap.appendChild(line);
+}
+
+/* small inline picker for an alternative */
+function openAltPicker(m,it,row){
+  const wrap=row.querySelector('[data-alts="'+it.id+'"]');
+  const box=document.createElement('div');box.className='pb-alt-add';box.style.marginTop='6px';
+  const sel=document.createElement('select');sel.className='pb-sel';sel.style.maxWidth='200px';sel.innerHTML=foodOptions('');
+  const qty=document.createElement('input');qty.className='pb-q';qty.type='number';qty.placeholder='وزن';qty.style.maxWidth='80px';
+  const ok=document.createElement('button');ok.className='pb-alt-btn';ok.textContent='حفظ';
+  ok.onclick=()=>{if(!sel.value){pbToast('اختر صنف البديل',true);return}const a=newAlt();a.food=sel.value;a.qty=parseFloat(qty.value)||0;it.alts.push(a);rebuildAlts(m,it,row)};
+  const cancel=document.createElement('button');cancel.className='pb-alt-btn';cancel.textContent='إلغاء';cancel.onclick=()=>rebuildAlts(m,it,row);
+  box.appendChild(sel);box.appendChild(qty);box.appendChild(ok);box.appendChild(cancel);
+  wrap.appendChild(box);
+}
+
+function updateDietTotals(){
+  meals.forEach(m=>{const el=document.querySelector('[data-mealmeta="'+m.id+'"]');if(el){const mm=mealMacros(m);el.textContent=r0(mm.cal)+' kcal'}});
+  const d=dayMacros();
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  set('pb_totCal',r0(d.cal));set('pb_totP',r1(d.p));set('pb_totC',r1(d.c));set('pb_totF',r1(d.f));
+  const g=id=>{const e=document.getElementById(id);return e?+e.value:0};
+  const tc=g('pb_tCal'),tp=g('pb_tPro'),tk=g('pb_tCarb'),tf=g('pb_tFat');
+  const tw=document.getElementById('pb_targetWrap');if(!tw)return;
+  if(tc||tp||tk||tf){tw.style.display='block';
+    const bar=(l,v,t,u)=>{if(!t)return'';const pct=Math.min(100,(v/t)*100),over=v>t*1.02;return '<div class="pb-tr"><span>'+l+'</span><b>'+r0(v)+' / '+t+' '+u+'</b></div><div class="pb-bar'+(over?' over':'')+'"><i style="width:'+pct+'%"></i></div>'};
+    document.getElementById('pb_targetBars').innerHTML=bar('سعرات',d.cal,tc,'kcal')+bar('بروتين',d.p,tp,'جم')+bar('كارب',d.c,tk,'جم')+bar('دهون',d.f,tf,'جم');
+  }else tw.style.display='none';
+}
+
+/* ============================================================
+   WORKOUT RENDER
+   ============================================================ */
+function pbRenderWorkout(){
+  const box=document.getElementById('pb_days');if(!box)return;
+  box.innerHTML='';
+  days.forEach((d,di)=>{
+    const el=document.createElement('div');el.className='pb-block';
+    const head=document.createElement('div');head.className='pb-block-head';
+    head.innerHTML='<div class="pb-num">'+(di+1)+'</div>';
+    const wrap=document.createElement('div');wrap.style.flex='1';
+    const nameIn=document.createElement('input');nameIn.className='pb-name';nameIn.value=d.name;nameIn.placeholder='اسم اليوم';nameIn.style.width='100%';
+    nameIn.addEventListener('input',e=>{d.name=e.target.value});
+    const focusIn=document.createElement('input');focusIn.className='pb-wi';focusIn.style.marginTop='6px';focusIn.style.fontSize='12px';focusIn.placeholder='العضلات المستهدفة (مثال: صدر · تراي · كتف)';focusIn.value=d.focus;
+    focusIn.addEventListener('input',e=>{d.focus=e.target.value});
+    wrap.appendChild(nameIn);wrap.appendChild(focusIn);head.appendChild(wrap);
+    const meta=document.createElement('span');meta.className='pb-meta';meta.dataset.daymeta=d.id;head.appendChild(meta);
+    const xb=document.createElement('button');xb.className='pb-x';xb.innerHTML=delSVG();xb.onclick=()=>{days=days.filter(x=>x.id!==d.id);pbRenderWorkout()};head.appendChild(xb);
+    el.appendChild(head);
+    const inner=document.createElement('div');inner.className='pb-inner';
+    const hr=document.createElement('div');hr.className='pb-wrow h';
+    hr.innerHTML='<span>التمرين (+ لينك)</span><span>سِت</span><span>عدّات</span><span>RIR</span><span>ملاحظات</span><span></span>';
+    inner.appendChild(hr);
+    d.exercises.forEach(e=>inner.appendChild(buildExRow(d,e)));
+    const addBtn=document.createElement('button');addBtn.className='pb-add';addBtn.textContent='+ إضافة تمرين';
+    addBtn.onclick=()=>{d.exercises.push(newEx());pbRenderWorkout()};
+    inner.appendChild(addBtn);
+    el.appendChild(inner);
+    box.appendChild(el);
+  });
+  if(!days.length)box.innerHTML='<p class="pb-empty">مفيش أيام — اضغط «إضافة يوم تمرين».</p>';
+  updateWorkoutTotals();
+}
+
+function buildExRow(d,e){
+  const row=document.createElement('div');row.className='pb-wrow';
+  // name cell with autocomplete from SAVED_EX + link input + save chip
+  const nameCell=document.createElement('div');nameCell.className='pb-exwrap';
+  const lbl1=document.createElement('span');lbl1.className='pb-wlbl';lbl1.textContent='التمرين';nameCell.appendChild(lbl1);
+  const nameIn=document.createElement('input');nameIn.className='pb-wi';nameIn.placeholder='اسم التمرين';nameIn.value=e.name;nameIn.autocomplete='off';
+  const sug=document.createElement('div');sug.className='pb-exsug';
+  function renderSug(){
+    const q=(e.name||'').trim().toLowerCase();
+    const matches=SAVED_EX.filter(x=>x.name.toLowerCase().includes(q));
+    if(!SAVED_EX.length){sug.innerHTML='<div class="pb-exsug-empty">مفيش تمارين محفوظة لسه — اكتب اسم التمرين ولينكه واحفظه.</div>';return}
+    if(!matches.length){sug.innerHTML='<div class="pb-exsug-empty">مفيش تطابق — اكتب اسم جديد واحفظه.</div>';return}
+    sug.innerHTML='';
+    matches.forEach(x=>{
+      const it=document.createElement('div');it.className='pb-exsug-item';
+      it.innerHTML='<span>'+pesc(x.name)+(x.link?' <span class="lnk">▶</span>':'')+'</span>';
+      const del=document.createElement('span');del.className='del';del.textContent='✕';
+      del.onclick=(ev)=>{ev.stopPropagation();SAVED_EX=SAVED_EX.filter(s=>s.name!==x.name);lsSet(LS_EX,SAVED_EX);renderSug()};
+      it.appendChild(del);
+      it.onmousedown=(ev)=>{ev.preventDefault();e.name=x.name;e.link=x.link||'';nameIn.value=x.name;linkIn.value=e.link;sug.classList.remove('show')};
+      sug.appendChild(it);
+    });
+  }
+  nameIn.addEventListener('input',ev=>{e.name=ev.target.value;renderSug();sug.classList.add('show')});
+  nameIn.addEventListener('focus',()=>{renderSug();sug.classList.add('show')});
+  nameIn.addEventListener('blur',()=>{setTimeout(()=>sug.classList.remove('show'),150)});
+  nameCell.appendChild(nameIn);nameCell.appendChild(sug);
+  const linkIn=document.createElement('input');linkIn.className='pb-wi';linkIn.style.marginTop='5px';linkIn.style.fontSize='12px';linkIn.style.direction='ltr';linkIn.placeholder='لينك يوتيوب (اختياري)';linkIn.value=e.link;
+  linkIn.addEventListener('input',ev=>{e.link=ev.target.value});
+  nameCell.appendChild(linkIn);
+  row.appendChild(nameCell);
+  // sets / reps / rir
+  [['sets','سِت','3'],['reps','عدّات','10-12'],['rir','RIR','2']].forEach(([k,l,ph])=>{
+    const c=document.createElement('div');const lb=document.createElement('span');lb.className='pb-wlbl';lb.textContent=l;c.appendChild(lb);
+    const inp=document.createElement('input');inp.className='pb-wi c';inp.placeholder=ph;inp.value=e[k];
+    inp.addEventListener('input',ev=>{e[k]=ev.target.value;if(k==='sets')updateWorkoutTotals()});
+    c.appendChild(inp);row.appendChild(c);
+  });
+  // note
+  const nc=document.createElement('div');const nlb=document.createElement('span');nlb.className='pb-wlbl';nlb.textContent='ملاحظات';nc.appendChild(nlb);
+  const noteIn=document.createElement('input');noteIn.className='pb-wi';noteIn.placeholder='ملاحظة تكنيك';noteIn.value=e.note;
+  noteIn.addEventListener('input',ev=>{e.note=ev.target.value});
+  nc.appendChild(noteIn);row.appendChild(nc);
+  // delete
+  const xb=document.createElement('button');xb.className='pb-x';xb.innerHTML=delSVG();
+  xb.onclick=()=>{d.exercises=d.exercises.filter(x=>x.id!==e.id);if(!d.exercises.length)d.exercises.push(newEx());pbRenderWorkout()};
+  row.appendChild(xb);
+  return row;
+}
+
+function updateWorkoutTotals(){
+  days.forEach(d=>{const el=document.querySelector('[data-daymeta="'+d.id+'"]');if(el)el.textContent=d.exercises.filter(e=>e.name).length+' تمرين'});
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  set('pb_wDays',days.length);
+  set('pb_wExercises',days.reduce((a,d)=>a+d.exercises.filter(e=>e.name).length,0));
+  set('pb_wSets',days.reduce((a,d)=>a+d.exercises.reduce((s,e)=>s+(parseInt(e.sets)||0),0),0));
+}
+
+function delSVG(){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>'}
+
+/* ============================================================
+   PUBLIC ACTIONS (window scope)
+   ============================================================ */
+window.pbSwitch=function(t){pbTab=t;
+  document.getElementById('pbtab-diet').classList.toggle('active',t==='diet');
+  document.getElementById('pbtab-workout').classList.toggle('active',t==='workout');
+  document.getElementById('pbview-diet').classList.toggle('active',t==='diet');
+  document.getElementById('pbview-workout').classList.toggle('active',t==='workout');
+  const mb=document.getElementById('pbManageBtn');if(mb)mb.textContent=(t==='workout'?'إدارة التمارين':'إدارة الأصناف');
+  if(typeof pbRefreshEditingBar==='function')pbRefreshEditingBar();
+};
+window.pbManageClick=function(){if(pbTab==='workout')pbOpenExercises();else pbOpenFoods()};
+window.pbAddMeal=function(){meals.push(newMeal());pbRenderDiet()};
+window.pbAddDay=function(){days.push(newDay());pbRenderWorkout()};
+window.pbSplitChange=function(v){const ci=document.getElementById('pb_wSplitCustom');ci.style.display=v==='__custom__'?'block':'none';if(v==='__custom__')ci.focus()};
+
+/* target inputs -> totals only (no re-render) */
+['pb_tCal','pb_tPro','pb_tCarb','pb_tFat'].forEach(id=>{document.addEventListener('input',ev=>{if(ev.target&&ev.target.id===id)updateDietTotals()})});
+
+/* ---------- FOODS MANAGEMENT (add + DELETE) ---------- */
+window.pbOpenFoods=function(){
+  let modal=document.getElementById('pbFoodsModal');
+  if(!modal){
+    modal=document.createElement('div');modal.id='pbFoodsModal';modal.className='modal';modal.dir='rtl';
+    modal.innerHTML='<div class="modal-box" style="max-width:680px"><div class="modal-head"><h2>إدارة الأصناف</h2><button class="modal-close" onclick="document.getElementById(\'pbFoodsModal\').classList.remove(\'show\')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'
+      +'<p style="font-size:13px;color:var(--ink-3);margin-bottom:16px">ضيف صنف بقيمه لكل 100 جرام. تقدر تحذف أي صنف — أساسي أو مخصص. الأصناف اللي تضيفها بتتحفظ في المتصفح.</p>'
+      +'<div style="display:grid;grid-template-columns:1.4fr 1fr .8fr .8fr .8fr .8fr auto;gap:8px;align-items:end;margin-bottom:8px" class="pb-food-add">'
+      +'<div class="pb-fld"><label>الاسم</label><input id="pb_nf_name" placeholder="فول مدمس"></div>'
+      +'<div class="pb-fld"><label>الفئة</label><select id="pb_nf_cat"></select></div>'
+      +'<div class="pb-fld"><label>سعرات</label><input id="pb_nf_cal" type="number"></div>'
+      +'<div class="pb-fld"><label>بروتين</label><input id="pb_nf_p" type="number"></div>'
+      +'<div class="pb-fld"><label>كارب</label><input id="pb_nf_c" type="number"></div>'
+      +'<div class="pb-fld"><label>دهون</label><input id="pb_nf_f" type="number"></div>'
+      +'<button class="btn btn-primary" onclick="pbAddFood()" style="height:41px;padding:0 16px">إضافة</button></div>'
+      +'<div id="pb_restoreRow" style="margin:8px 0 4px"></div>'
+      +'<div class="pb-flist" id="pb_foodList"></div></div>';
+    document.body.appendChild(modal);
+  }
+  const catSel=document.getElementById('pb_nf_cat');
+  const S=window._pbState();
+  catSel.innerHTML=Object.keys(S.SEED_FOODS).map(c=>'<option>'+c+'</option>').join('');
+  pbRenderFoodList();
+  modal.classList.add('show');
+};
+function pbRenderFoodList(){
+  const box=document.getElementById('pb_foodList');if(!box)return;box.innerHTML='';
+  // restore-defaults button (only if some USDA items were deleted)
+  const rr=document.getElementById('pb_restoreRow');
+  if(rr){rr.innerHTML='';if(DELETED_FOODS.length){const rb=document.createElement('button');rb.className='pb-alt-btn';rb.textContent='↩ استرجاع الأصناف الأساسية المحذوفة ('+DELETED_FOODS.length+')';rb.onclick=pbRestoreFoods;rr.appendChild(rb)}}
+  for(const[cat,arr]of Object.entries(FOODS)){
+    const h=document.createElement('div');h.className='pb-fcat';h.textContent=cat;box.appendChild(h);
+    arr.forEach(f=>{
+      const row=document.createElement('div');row.className='pb-fitem';
+      row.innerHTML='<div class="fn">'+(f.custom?'<span class="pb-custom-tag">مخصص</span>':'')+pesc(f.n)+'</div>'
+        +'<div class="fv">'+f.cal+'</div><div class="fv">'+f.p+'</div><div class="fv">'+f.c+'</div><div class="fv">'+f.f+'</div>';
+      const act=document.createElement('button');act.className='pb-x';act.innerHTML=delSVG();
+      act.onclick=()=>pbDelFood(cat,f.n,f.custom);
+      row.appendChild(act);box.appendChild(row);
+    });
+  }
+}
+window.pbRestoreFoods=function(){DELETED_FOODS=[];lsSet(LS_DELFOODS,DELETED_FOODS);reindex();pbRenderFoodList();pbRenderDiet();pbToast('تم استرجاع الأصناف الأساسية')};
+window.pbAddFood=function(){
+  const g=id=>document.getElementById(id);
+  const name=g('pb_nf_name').value.trim(),cat=g('pb_nf_cat').value;
+  if(!name){pbToast('اكتب اسم الصنف',true);return}
+  if(FIDX[name]){pbToast('الصنف موجود بالفعل',true);return}
+  if(!CUSTOM[cat])CUSTOM[cat]=[];
+  CUSTOM[cat].push({n:name,cal:+g('pb_nf_cal').value||0,p:+g('pb_nf_p').value||0,c:+g('pb_nf_c').value||0,f:+g('pb_nf_f').value||0,src:'مخصص — بواسطتك'});
+  lsSet(LS_FOODS,CUSTOM);reindex();pbRenderFoodList();pbRenderDiet();
+  ['pb_nf_name','pb_nf_cal','pb_nf_p','pb_nf_c','pb_nf_f'].forEach(id=>g(id).value='');
+  pbToast('تمت إضافة الصنف');
+};
+window.pbDelFood=function(cat,name,isCustom){
+  if(isCustom){
+    if(CUSTOM[cat]){CUSTOM[cat]=CUSTOM[cat].filter(f=>f.n!==name);if(!CUSTOM[cat].length)delete CUSTOM[cat];lsSet(LS_FOODS,CUSTOM)}
+  }else{
+    if(!DELETED_FOODS.includes(name)){DELETED_FOODS.push(name);lsSet(LS_DELFOODS,DELETED_FOODS)}
+  }
+  reindex();pbRenderFoodList();pbRenderDiet();pbToast('تم حذف الصنف');
+};
+
+/* ---------- EXERCISE LIBRARY MANAGEMENT (add + link + delete + assign to any day) ---------- */
+window.pbOpenExercises=function(){
+  let modal=document.getElementById('pbExModal');
+  if(!modal){
+    modal=document.createElement('div');modal.id='pbExModal';modal.className='modal';modal.dir='rtl';
+    modal.innerHTML='<div class="modal-box" style="max-width:680px"><div class="modal-head"><h2>إدارة التمارين</h2><button class="modal-close" onclick="document.getElementById(\'pbExModal\').classList.remove(\'show\')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'
+      +'<p style="font-size:13px;color:var(--ink-3);margin-bottom:16px">ضيف تمرين باسمه ولينك الفيديو بتاعه، يتحفظ في مكتبتك. وبعدين من خانة اسم التمرين في أي يوم، دوس تلاقيه واختاره باللينك بتاعه.</p>'
+      +'<div style="display:grid;grid-template-columns:1.3fr 1.6fr auto;gap:8px;align-items:end;margin-bottom:8px">'
+      +'<div class="pb-fld"><label>اسم التمرين</label><input id="pb_nx_name" placeholder="Incline Smith Press"></div>'
+      +'<div class="pb-fld"><label>لينك يوتيوب (اختياري)</label><input id="pb_nx_link" placeholder="https://youtu.be/..." style="direction:ltr"></div>'
+      +'<button class="btn btn-primary" onclick="pbAddExercise()" style="height:41px;padding:0 16px">إضافة</button></div>'
+      +'<div class="pb-flist" id="pb_exList" style="max-height:380px"></div></div>';
+    document.body.appendChild(modal);
+  }
+  pbRenderExList();
+  modal.classList.add('show');
+};
+function pbDayOptions(){
+  if(!days.length)return '';
+  return days.map((d,i)=>'<option value="'+d.id+'">'+pesc(d.name||('اليوم '+(i+1)))+'</option>').join('');
+}
+function pbRenderExList(){
+  const box=document.getElementById('pb_exList');if(!box)return;box.innerHTML='';
+  if(!SAVED_EX.length){box.innerHTML='<p class="pb-empty">مفيش تمارين محفوظة لسه — ضيف تمرين من فوق.</p>';return}
+  SAVED_EX.forEach((x)=>{
+    const row=document.createElement('div');row.className='pb-fitem';row.style.gridTemplateColumns='1fr auto';
+    row.innerHTML='<div class="fn">'+pesc(x.name)+(x.link?'<div class="pb-fsrc" style="direction:ltr;text-align:right">▶ '+pesc(x.link)+'</div>':'<div class="pb-fsrc">— من غير لينك</div>')+'</div>';
+    const del=document.createElement('button');del.className='pb-x';del.innerHTML=delSVG();
+    del.onclick=()=>{SAVED_EX=SAVED_EX.filter(s=>s.name!==x.name);lsSet(LS_EX,SAVED_EX);pbRenderExList()};
+    row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+window.pbAddExercise=function(){
+  const g=id=>document.getElementById(id);
+  const name=g('pb_nx_name').value.trim(),link=g('pb_nx_link').value.trim();
+  if(!name){pbToast('اكتب اسم التمرين',true);return}
+  const ex=SAVED_EX.find(s=>s.name===name);
+  if(ex){ex.link=link}else{SAVED_EX.push({name,link})}
+  lsSet(LS_EX,SAVED_EX);pbRenderExList();
+  g('pb_nx_name').value='';g('pb_nx_link').value='';
+  pbToast('تم حفظ التمرين');
+};
+window.pbAssignExToDay=function(x,dayId){
+  const d=days.find(dd=>dd.id===dayId);if(!d){pbToast('اختر يوم',true);return}
+  let target=d.exercises.find(e=>!e.name);
+  if(!target){target=newEx();d.exercises.push(target)}
+  target.name=x.name;target.link=x.link||'';
+  pbRenderWorkout();pbToast('تمت إضافة «'+x.name+'» لـ '+d.name);
+};
+
+/* ---------- SAMPLE ---------- */
+/* ---------- LABELS (bilingual) ---------- */
+const L={
+  ar:{diet:'النظام الغذائي',workout:'برنامج التمرين',plan:'MEAL PLAN',wplan:'WORKOUT',
+    goal:'الهدف',dur:'المدة',cal:'السعرات',split:'نظام التمرين',
+    item:'الصنف',qty:'الكمية',cals:'سعرات',pro:'بروتين',carb:'كارب',fat:'دهون',alts:'بدائل',
+    total:'إجمالي اليوم',supps:'المكملات',peds:'PEDs',recipes:'وصفات',notes:'تعليمات عامة',
+    days:'أيام',ex:'تمرين',sets:'مجاميع',reps:'تكرارات',focusMuscles:'',
+    wnotes:'ملاحظات عامة',tapVideo:'اضغط على اسم أي تمرين لفتح الفيديو',rights:'جميع الحقوق محفوظة',
+    protein:'بروتين',carbs:'نشويات',fats:'دهون',alt:'بديل'},
+  en:{diet:'Nutrition Plan',workout:'Training Program',plan:'MEAL PLAN',wplan:'WORKOUT',
+    goal:'Goal',dur:'Duration',cal:'Calories',split:'Split',
+    item:'Item',qty:'Amount',cals:'Cals',pro:'Protein',carb:'Carbs',fat:'Fats',alts:'Alternatives',
+    total:'Daily Total',supps:'Supplements',peds:'PEDs',recipes:'Recipes',notes:'General Notes',
+    days:'Days',ex:'Exercises',sets:'Sets',reps:'Reps',focusMuscles:'',
+    wnotes:'Notes',tapVideo:'Tap any exercise name to open its video',rights:'All rights reserved',
+    protein:'Protein',carbs:'Carbs',fats:'Fats',alt:'Alt'}
+};
+
+function pbGoalEN(ar){return({'تنشيف / خسارة دهون':'Cutting / Fat Loss','تضخيم / بناء عضل':'Bulking / Muscle Gain','ثبات / لياقة عامة':'Maintenance','قوة':'Strength','لياقة عامة':'General Fitness'})[ar]||ar}
+
+const PDF_CSS=`
+#pbpdf{font-family:'Tajawal','Sora',sans-serif;color:#E8EDF2;width:780px;background:#0A0C0F;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+#pbpdf *{box-sizing:border-box;letter-spacing:normal!important;word-spacing:normal}
+#pbpdf.en{font-family:'Sora','Inter','Tajawal',sans-serif}
+.pp{background:#0A0C0F;padding:34px 30px;page-break-after:always;position:relative}
+.pp:last-child{page-break-after:auto}
+.pprule{height:3px;background:linear-gradient(90deg,#4FD1C5,#7DE8DE);border-radius:2px}
+.pphead{display:flex;align-items:center;justify-content:space-between;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:22px}
+.pphl{display:flex;align-items:center;gap:11px}
+.pplogo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#4FD1C5,#7DE8DE);display:grid;place-items:center;font-family:'Sora','Tajawal';font-weight:800;color:#06201d;font-size:16px}
+.ppbrand{font-family:'Sora','Tajawal';font-weight:800;font-size:14px;color:#fff;line-height:1.2}
+.ppbrand span{color:#4FD1C5;font-size:10px;letter-spacing:3px;font-weight:600;display:block}
+.pptag{font-family:'IBM Plex Mono','Tajawal';font-size:11px;color:#4FD1C5;letter-spacing:1px;text-transform:uppercase}
+.ppcover{display:flex;flex-direction:column;justify-content:center;min-height:960px;text-align:center;padding:60px 40px}
+.ppc-logo{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#4FD1C5,#7DE8DE);display:grid;place-items:center;font-family:'Sora','Tajawal';font-weight:800;color:#06201d;font-size:26px;margin:0 auto 20px}
+.ppc-brand{font-family:'Sora','Tajawal';font-weight:800;font-size:20px;color:#fff;letter-spacing:3px}
+.ppc-brand span{display:block;color:#4FD1C5;font-size:12px;letter-spacing:6px;margin-top:4px}
+.ppc-line{width:60px;height:3px;background:#4FD1C5;margin:26px auto;border-radius:2px}
+.ppc-title{font-size:44px;font-weight:800;color:#fff;margin-bottom:8px}
+.ppc-sub{font-family:'IBM Plex Mono','Tajawal';color:#8A97A6;font-size:15px;margin-bottom:34px}
+.ppc-meta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
+.ppc-chip{background:rgba(79,209,197,.08);border:1px solid rgba(79,209,197,.25);border-radius:12px;padding:14px 22px;min-width:130px}
+.ppc-chip span{display:block;font-size:11px;color:#8A97A6;font-family:'IBM Plex Mono','Tajawal';margin-bottom:5px}
+.ppc-chip b{color:#4FD1C5;font-size:16px}
+.ppc-chip b bdi{unicode-bidi:isolate}
+.ppc-macros{display:flex;gap:14px;justify-content:center}
+.ppcm{background:#141A20;border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:18px 30px}
+.ppcm-n{font-family:'Sora','Tajawal';font-weight:700;font-size:28px;color:#4FD1C5}
+.ppcm-l{font-size:12px;color:#8A97A6;margin-top:3px}
+.ppc-foot{margin-top:44px;font-family:'IBM Plex Mono','Tajawal';font-size:11px;color:#5C6875;letter-spacing:1px}
+.ppmeal{background:#0F1318;border:1px solid rgba(255,255,255,.07);border-radius:13px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid}
+.ppmeal-h{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:#141A20;border-bottom:1px solid rgba(79,209,197,.18)}
+.ppmeal-t{display:flex;align-items:center;gap:11px;font-weight:800;font-size:16px;color:#fff}
+.ppnum{width:28px;height:28px;border-radius:8px;background:rgba(79,209,197,.12);border:1px solid rgba(79,209,197,.25);display:grid;place-items:center;font-family:'IBM Plex Mono','Tajawal';color:#4FD1C5;font-size:13px}
+.ppmeal-s{font-family:'IBM Plex Mono','Tajawal';font-size:11px;color:#4FD1C5;direction:ltr;unicode-bidi:isolate}
+.pptbl{width:100%;border-collapse:collapse}
+.pptbl th{font-family:'IBM Plex Mono','Tajawal';font-size:10px;color:#5C6875;text-transform:uppercase;padding:9px 6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.07)}
+.pptbl th.fn{text-align:var(--ta,right);padding-inline:18px 6px}
+.pptbl td{padding:10px 6px;text-align:center;font-family:'IBM Plex Mono','Tajawal';font-size:12px;color:#E8EDF2;border-bottom:1px solid rgba(255,255,255,.05)}
+.pptbl td.fn{text-align:var(--ta,right);padding-inline:18px 6px;font-family:'Tajawal';font-weight:700;font-size:13px;unicode-bidi:plaintext}
+#pbpdf.en .pptbl td.fn{font-family:'Sora','Tajawal'}
+.pptbl td.q{color:#4FD1C5}.pptbl td.alt{font-family:'Tajawal';font-size:11px;color:#8A97A6;unicode-bidi:plaintext}
+#pbpdf.en .pptbl td.alt{font-family:'Inter'}
+.pptbl tr:last-child td{border-bottom:none}
+.pptot{background:linear-gradient(135deg,rgba(79,209,197,.12),rgba(79,209,197,.03));border:1px solid rgba(79,209,197,.3);border-radius:13px;padding:18px 22px;margin-top:6px;page-break-inside:avoid}
+.pptot .l{font-family:'IBM Plex Mono','Tajawal';font-size:11px;color:#8A97A6;letter-spacing:1px;margin-bottom:6px}
+.pptot .v{font-size:17px;color:#fff;font-weight:700}
+.ppblock{background:#0F1318;border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:20px 24px;margin-bottom:14px;page-break-inside:avoid}
+.ppblock h3{font-size:15px;color:#4FD1C5;margin-bottom:12px;font-family:'Sora','Tajawal';font-weight:700}
+.ppblock ul{list-style:none}
+.ppblock li{padding:7px 0;padding-inline-start:20px;position:relative;font-size:13px;color:#E8EDF2;border-bottom:1px solid rgba(255,255,255,.04);text-align:right;unicode-bidi:isolate}
+#pbpdf.en .ppblock li{text-align:left}
+.ppblock li:last-child{border:none}
+.ppblock li:before{content:'';position:absolute;inset-inline-start:0;top:14px;width:6px;height:6px;border-radius:2px;background:#4FD1C5}
+.ppday{background:#0F1318;border:1px solid rgba(255,255,255,.07);border-radius:13px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid}
+.ppday-h{padding:14px 18px;background:linear-gradient(135deg,rgba(79,209,197,.14),rgba(79,209,197,.04));border-bottom:1px solid rgba(79,209,197,.2)}
+.ppday-t{font-weight:800;font-size:16px;color:#fff;display:flex;align-items:center;gap:10px}
+.ppday-f{font-size:12px;color:#8A97A6;margin-top:4px;padding-inline-start:38px}
+.ppwtbl{width:100%;border-collapse:collapse}
+.ppwtbl th{font-family:'IBM Plex Mono','Tajawal';font-size:10px;color:#5C6875;text-transform:uppercase;padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.07)}
+.ppwtbl th.ex{text-align:var(--ta,right);padding-inline:18px 6px}
+.ppwtbl td{padding:11px 6px;text-align:center;font-family:'IBM Plex Mono','Tajawal';font-size:12px;color:#E8EDF2;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+.ppwtbl td.ex{text-align:var(--ta,right);padding-inline:18px 6px;unicode-bidi:plaintext}
+.ppwtbl td.ex .note{unicode-bidi:plaintext}
+.ppwtbl td.ex a,.ppwtbl td.ex .exn{font-family:'Sora','Tajawal';font-weight:700;font-size:13px;color:#fff;text-decoration:none}
+.ppwtbl td.ex a{color:#4FD1C5;text-decoration:underline;text-decoration-color:rgba(79,209,197,.4)}
+.ppwtbl td.ex .note{display:block;font-family:'Tajawal';font-size:11px;color:#8A97A6;font-weight:400;margin-top:3px}
+#pbpdf.en .ppwtbl td.ex .note{font-family:'Inter'}
+.ppwtbl td.rir{color:#E8B84C}
+.ppwtbl tr:last-child td{border-bottom:none}
+.ppbadge{width:26px;height:26px;border-radius:7px;background:rgba(79,209,197,.14);display:inline-grid;place-items:center;font-family:'IBM Plex Mono','Tajawal';color:#4FD1C5;font-size:12px}
+`;
+
+function ppHead(tag,dir){return '<div class="pprule"></div><div class="pphead"><div class="pphl"><div class="pplogo">AS</div><div class="ppbrand">AHMED SAEED<span>COACHING</span></div></div><div class="pptag">'+tag+'</div></div>'}
+
+function buildDietPDFHtml(){
+  const S=window._pbState();const t=L[lang];const en=lang==='en';
+  const g=id=>document.getElementById(id).value.trim();
+  const d=S.dayMacros();
+  const name=g('pb_clientName');
+  let goal=document.getElementById('pb_goal').value;if(en)goal=pbGoalEN(goal);
+  const dur=g('pb_duration');
+  const lines=id=>g(id).split('\n').filter(x=>x.trim());
+  const supps=lines('pb_supps'),peds=lines('pb_peds'),recipes=lines('pb_recipes'),notes=lines('pb_notes');
+  let mealsHTML='';
+  meals.forEach((m,mi)=>{
+    const mm=S.mealMacros(m);let rows='';
+    m.items.forEach(it=>{if(!it.food)return;const x=S.itemMacros(it);
+      const altTxt=it.alts.filter(a=>a.food).map(a=>pesc(a.food)+(a.qty?(' '+S.r0(a.qty)+'g'):'')).join(' · ');
+      rows+='<tr><td class="fn">'+pesc(it.food)+'</td><td class="q">'+S.r0(it.qty)+'g</td><td>'+S.r0(x.cal)+'</td><td>'+S.r1(x.p)+'</td><td>'+S.r1(x.c)+'</td><td>'+S.r1(x.f)+'</td><td class="alt">'+altTxt+'</td></tr>';});
+    mealsHTML+='<div class="ppmeal"><div class="ppmeal-h"><div class="ppmeal-t"><span class="ppnum">'+(mi+1)+'</span>'+pesc(m.name)+'</div>'
+      +'<div class="ppmeal-s">'+S.r0(mm.cal)+' kcal · P'+S.r1(mm.p)+' · C'+S.r1(mm.c)+' · F'+S.r1(mm.f)+'</div></div>'
+      +'<table class="pptbl"><thead><tr><th class="fn">'+t.item+'</th><th>'+t.qty+'</th><th>'+t.cals+'</th><th>'+t.pro+'</th><th>'+t.carb+'</th><th>'+t.fat+'</th><th class="alt">'+t.alts+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  });
+  const blk=(title,arr)=>arr.length?('<div class="ppblock"><h3>'+title+'</h3><ul>'+arr.map(s=>'<li><bdi>'+pesc(s)+'</bdi></li>').join('')+'</ul></div>'):'';
+  const extras=blk(t.supps,supps)+blk(t.peds,peds)+blk(t.recipes,recipes)+blk(t.notes,notes);
+  return `<div id="pbpdf" class="${en?'en':''}" dir="${en?'ltr':'rtl'}" style="--ta:${en?'left':'right'}">
+    <div class="pp ppcover"><div class="ppc-logo">AS</div><div class="ppc-brand">AHMED SAEED<span>COACHING</span></div>
+      <div class="ppc-line"></div><div class="ppc-title">${t.diet}</div><div class="ppc-sub">${pesc(name||(en?'Personalized Nutrition Plan':'نظام غذائي'))}</div>
+      <div class="ppc-meta"><div class="ppc-chip"><span>${t.goal}</span><b><bdi style="unicode-bidi:plaintext">${pesc(goal)}</bdi></b></div>
+        ${dur?`<div class="ppc-chip"><span>${t.dur}</span><b><bdi>${pesc(dur)}</bdi></b></div>`:''}
+        <div class="ppc-chip"><span>${t.cal}</span><b><bdi>${S.r0(d.cal)} KCAL</bdi></b></div></div>
+      <div class="ppc-macros"><div class="ppcm"><div class="ppcm-n">${S.r1(d.p)}g</div><div class="ppcm-l">${t.protein}</div></div>
+        <div class="ppcm"><div class="ppcm-n">${S.r1(d.c)}g</div><div class="ppcm-l">${t.carbs}</div></div>
+        <div class="ppcm"><div class="ppcm-n">${S.r1(d.f)}g</div><div class="ppcm-l">${t.fats}</div></div></div>
+      <div class="ppc-foot">@iamahmedsaeed02 · ${t.rights}</div></div>
+    <div class="pp">${ppHead(t.plan)}${mealsHTML}
+      <div class="pptot"><div class="l">MACROS DAILY TOTAL — ${t.total}</div>
+        <div class="v"><bdi>${S.r0(d.cal)} KCAL</bdi> &nbsp;·&nbsp; ${t.protein} <bdi>${S.r1(d.p)}g</bdi> &nbsp;·&nbsp; ${t.carb} <bdi>${S.r1(d.c)}g</bdi> &nbsp;·&nbsp; ${t.fat} <bdi>${S.r1(d.f)}g</bdi></div></div></div>
+    ${extras?`<div class="pp">${ppHead(t.notes)}${extras}</div>`:''}
+  </div>`;
+}
+
+function buildWorkoutPDFHtml(){
+  const S=window._pbState();const t=L[lang];const en=lang==='en';
+  const g=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
+  const name=g('pb_wClientName');
+  let split=document.getElementById('pb_wSplit').value;if(split==='__custom__')split=g('pb_wSplitCustom');
+  let goal=document.getElementById('pb_wGoal').value;if(en)goal=pbGoalEN(goal);
+  const dur=g('pb_wDuration');
+  const notes=g('pb_wNotes').split('\n').filter(x=>x.trim());
+  const nEx=days.reduce((a,d)=>a+d.exercises.filter(e=>e.name).length,0);
+  let daysHTML='';
+  days.forEach((d,di)=>{
+    let rows='',i=0;
+    d.exercises.forEach(e=>{if(!e.name)return;i++;
+      const nm=e.link?('<a href="'+pesc(e.link)+'">'+pesc(e.name)+'</a>'):('<span class="exn">'+pesc(e.name)+'</span>');
+      const note=e.note?('<span class="note">'+pesc(e.note)+'</span>'):'';
+      rows+='<tr><td style="width:34px"><span class="ppbadge">'+i+'</span></td><td class="ex">'+nm+note+'</td><td>'+pesc(e.sets||'—')+'</td><td>'+pesc(e.reps||'—')+'</td><td class="rir">'+pesc(e.rir||'—')+'</td></tr>';});
+    daysHTML+='<div class="ppday"><div class="ppday-h"><div class="ppday-t"><span class="ppbadge">'+(di+1)+'</span>'+pesc(d.name)+'</div>'
+      +(d.focus?'<div class="ppday-f">'+pesc(d.focus)+'</div>':'')+'</div>'
+      +'<table class="ppwtbl"><thead><tr><th></th><th class="ex">'+t.item+'</th><th>'+t.sets+'</th><th>'+t.reps+'</th><th>RIR</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  });
+  const noteHTML=notes.length?('<div class="ppblock"><h3>'+t.wnotes+'</h3><ul>'+notes.map(s=>'<li><bdi>'+pesc(s)+'</bdi></li>').join('')+'</ul></div>'):'';
+  return `<div id="pbpdf" class="${en?'en':''}" dir="${en?'ltr':'rtl'}" style="--ta:${en?'left':'right'}">
+    <div class="pp ppcover"><div class="ppc-logo">AS</div><div class="ppc-brand">AHMED SAEED<span>COACHING</span></div>
+      <div class="ppc-line"></div><div class="ppc-title">${t.workout}</div><div class="ppc-sub">${pesc(name||(en?'Training Program':'برنامج تمرين'))}</div>
+      <div class="ppc-meta">${split?`<div class="ppc-chip"><span>${t.split}</span><b><bdi>${pesc(split)}</bdi></b></div>`:''}
+        <div class="ppc-chip"><span>${t.goal}</span><b><bdi style="unicode-bidi:plaintext">${pesc(goal)}</bdi></b></div>
+        ${dur?`<div class="ppc-chip"><span>${t.dur}</span><b><bdi>${pesc(dur)}</bdi></b></div>`:''}</div>
+      <div class="ppc-macros"><div class="ppcm"><div class="ppcm-n">${days.length}</div><div class="ppcm-l">${t.days}</div></div>
+        <div class="ppcm"><div class="ppcm-n">${nEx}</div><div class="ppcm-l">${t.ex}</div></div></div>
+      <div class="ppc-foot">${t.tapVideo} · @iamahmedsaeed02</div></div>
+    <div class="pp">${ppHead(t.wplan)}${daysHTML}${noteHTML}</div></div>`;
+}
+
+window.pbPDF=function(){
+  let html,fname;
+  if(pbTab==='diet'){
+    if(!meals.some(m=>m.items.some(i=>i.food))){pbToast('ضيف أصناف الأول',true);return}
+    html=buildDietPDFHtml();fname='AhmedSaeed-Diet-'+(document.getElementById('pb_clientName').value.trim()||'plan');
+  }else{
+    if(!days.some(d=>d.exercises.some(e=>e.name))){pbToast('ضيف تمارين الأول',true);return}
+    html=buildWorkoutPDFHtml();fname='AhmedSaeed-Workout-'+(document.getElementById('pb_wClientName').value.trim()||'plan');
+  }
+
+  // ---- iOS-safe printing ----
+  // window.open is pop-up blocked on iOS, and iframe.print() is ignored by iOS
+  // Safari (it prints the parent). The only reliable way is to print THIS
+  // document while hiding everything except the PDF content.
+  const oldRoot=document.getElementById('pbPrintRoot'); if(oldRoot) oldRoot.remove();
+  const oldStyle=document.getElementById('pbPrintStyle'); if(oldStyle) oldStyle.remove();
+
+  const root=document.createElement('div');
+  root.id='pbPrintRoot';
+  root.innerHTML=html;                       // the .pp pages
+  document.body.appendChild(root);           // must be a DIRECT child of body
+
+  const st=document.createElement('style');
+  st.id='pbPrintStyle';
+  // NOTE: PDF_CSS is scoped to #pbpdf so it is safe to load unconditionally.
+  // PRINT_CSS is NOT reused here because it contains its own @media print
+  // block (nesting @media inside @media is invalid CSS).
+  st.textContent =
+    PDF_CSS +
+    '#pbPrintRoot{display:none}'+
+    '@page{size:A4;margin:0}'+
+    '@media print{'+
+      'html,body{background:#0A0C0F !important;margin:0 !important;padding:0 !important;height:auto !important;min-height:0 !important;overflow:visible !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+      '#pbPrintRoot *{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+      // hide every top-level element except our print root
+      'body > *:not(#pbPrintRoot){display:none !important}'+
+      '#pbPrintRoot{display:block !important;position:static !important;width:auto !important}'+
+      /* CRITICAL — fixed layout width (794px = 210mm @96dpi).
+         With width:100% the layout box is the DEVICE viewport (390px on iPhone),
+         so text reflows taller and Safari then scales the whole block up to the
+         paper width, blowing any absolute mm height past one page. A fixed px
+         width makes the layout identical on every device. */
+      /* CRITICAL (proven on a real iPhone):
+         the diagnostic reported bodyWidth=390 while the content box is 794px,
+         i.e. a real horizontal overflow. When content is wider than the page
+         box, Safari applies "shrink-to-fit" and the scale factor it picks is
+         undefined — if it scales relative to the 390px body the whole document
+         is blown up ~2x and the cover overflows onto an empty extra page.
+         Pinning html/body to the same 794px removes the overflow entirely and
+         makes the scale deterministic (1:1 with A4 at 96dpi). */
+      'html,body{width:794px !important;min-width:794px !important;max-width:794px !important;overflow-x:visible !important}'+
+      '#pbpdf{width:794px !important;max-width:794px !important;margin:0 auto !important;font-size:medium}'+
+      '#pbpdf .pp{width:794px !important;padding:14mm 12mm !important;box-sizing:border-box !important;min-height:0 !important;page-break-after:always;break-after:page}'+
+      '#pbpdf .pp:last-child{page-break-after:auto;break-after:auto}'+
+      /* --- WebKit/iOS pagination hardening --------------------------------
+         1) FLEX: WebKit has long-standing bugs paginating flex containers;
+            a flex page block can emit a phantom empty page. The cover is
+            rendered as a plain block and centred with padding instead.
+         2) OVERFLOW: overflow!=visible creates a new formatting context that
+            WebKit may treat as unbreakable, pushing content to a fresh page.
+         3) POSITION: relative/sticky/fixed offsets are unreliable across
+            printed pages; force static inside the print root.
+         4) TRANSFORMS/ANIMATIONS: create stacking contexts that break
+            pagination; neutralised.                                      */
+      /* content is ~120mm tall; 80mm top padding centres it on a 297mm page
+         while leaving headroom if the client name / chips wrap to 2 lines. */
+      '#pbpdf .pp.ppcover{display:block !important;min-height:0 !important;padding:80mm 12mm 30mm !important;text-align:center}'+
+      '#pbPrintRoot *{overflow:visible !important;position:static !important;transform:none !important;animation:none !important;transition:none !important;filter:none !important;will-change:auto !important}'+
+      '#pbpdf .ppmeal,#pbpdf .ppday,#pbpdf .ppblock,#pbpdf .pptot{page-break-inside:avoid;break-inside:avoid}'+
+      '#pbpdf .pptbl tr{page-break-inside:avoid;break-inside:avoid}'+
+      /* kill phantom line boxes from whitespace text nodes between .pp blocks */
+      '#pbpdf{font-size:0 !important;line-height:0 !important}'+
+      '#pbpdf > .pp{font-size:medium !important;line-height:normal !important}'+
+    '}';
+  document.head.appendChild(st);
+
+  const cleanup=()=>{ try{ root.remove(); st.remove(); }catch(e){} };
+  // restore the dashboard after the print sheet closes (plus a safety timeout)
+  const onAfter=()=>{ window.removeEventListener('afterprint',onAfter); setTimeout(cleanup,300); };
+  window.addEventListener('afterprint',onAfter);
+  setTimeout(cleanup,60000);
+
+  const fire=()=>{ try{ window.focus(); window.print(); pbToast('اختر «Save as PDF» من شاشة الطباعة'); }
+                   catch(e){ cleanup(); pbToast('تعذّرت الطباعة — '+errMsg(e),true); } };
+  // let the fonts settle first, otherwise Arabic can print unshaped
+  if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(()=>setTimeout(fire,400)); }
+  else setTimeout(fire,700);
+};
+
+/* print-specific rules: exact A4 pages, keep dark background, hide the toolbar */
+const PRINT_CSS=`
+@page{size:A4;margin:0}
+html,body{margin:0;padding:0;background:#0A0C0F;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+/* full-bleed backdrop: fixed layers repeat on every printed page in Chromium,
+   covering sub-pixel rounding gaps at the page edges */
+body::before{content:'';position:fixed;top:-10mm;left:-10mm;right:-10mm;bottom:-10mm;background:#0A0C0F;z-index:-1}
+#pbpdf{width:100%;max-width:none;margin:0}
+#pbpdf .pp{width:100%;padding:14mm 12mm;box-sizing:border-box;min-height:0}
+#pbpdf .pp.ppcover{min-height:240mm;justify-content:center}
+.pb-printbar{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;gap:14px;justify-content:center;
+  background:#141A20;border-top:1px solid rgba(79,209,197,.3);padding:12px;font-family:'Tajawal',sans-serif;z-index:99}
+.pb-printbar button{background:#4FD1C5;color:#04201D;border:none;border-radius:100px;padding:11px 22px;font-family:'Sora',sans-serif;font-weight:700;font-size:14px;cursor:pointer}
+.pb-printbar span{color:#8A97A6;font-size:13px}
+@media print{
+  .pb-printbar{display:none!important}
+  #pbpdf .pp{page-break-after:always;break-after:page}
+  #pbpdf .pp:last-child{page-break-after:auto;break-after:auto}
+  .ppmeal,.ppday,.ppblock,.pptot{page-break-inside:avoid;break-inside:avoid}
+}
+`;
+
+function pbStyle(ws,addr,o){o=o||{};if(!ws[addr])ws[addr]={t:'s',v:''};ws[addr].s={};if(o.fill)ws[addr].s.fill={patternType:'solid',fgColor:{rgb:o.fill}};if(o.font)ws[addr].s.font=o.font;if(o.align)ws[addr].s.alignment=Object.assign({vertical:'center'},o.align);if(o.border)ws[addr].s.border=o.border}
+window.pbExcel=function(){
+  const S=window._pbState();const t=L[lang];const en=lang==='en';
+  const teal='4FD1C5',dark='0F1318',dark2='141A20',white='E8EDF2',mut='8A97A6',gold='E8B84C';
+  const thin={style:'thin',color:{rgb:'2A3540'}};const bAll={top:thin,bottom:thin,left:thin,right:thin};
+  const wb=XLSX.utils.book_new();
+  if(pbTab==='diet'){
+    if(!meals.some(m=>m.items.some(i=>i.food))){pbToast('ضيف أصناف الأول',true);return}
+    const d=S.dayMacros();const name=document.getElementById('pb_clientName').value.trim();
+    const aoa=[],merges=[],meta=[];
+    aoa.push(['Ahmed Saeed Coaching — '+t.diet,'','','','','','']);meta.push('title');merges.push({s:{r:0,c:0},e:{r:0,c:6}});
+    let goal=document.getElementById('pb_goal').value;if(en)goal=pbGoalEN(goal);
+    aoa.push([(name||'—'),'',t.goal+': '+goal,'','','','']);meta.push('sub');merges.push({s:{r:1,c:0},e:{r:1,c:1}});merges.push({s:{r:1,c:2},e:{r:1,c:6}});
+    aoa.push(['','','','','','','']);meta.push('gap');
+    meals.forEach(m=>{const mm=S.mealMacros(m);
+      aoa.push([m.name,'','','','','','']);meta.push('meal');merges.push({s:{r:aoa.length-1,c:0},e:{r:aoa.length-1,c:6}});
+      aoa.push([t.item,t.qty,t.cals,t.pro,t.carb,t.fat,t.alts]);meta.push('thead');
+      m.items.forEach(it=>{if(!it.food)return;const x=S.itemMacros(it);
+        const altTxt=it.alts.filter(a=>a.food).map(a=>a.food+(a.qty?(' '+S.r0(a.qty)+'g'):'')).join(' · ');
+        aoa.push([it.food,S.r0(it.qty),S.r0(x.cal),S.r1(x.p),S.r1(x.c),S.r1(x.f),altTxt]);meta.push('data');});
+      aoa.push([t.total==='Daily Total'?'Meal Total':'مجموع الوجبة','',S.r0(mm.cal),S.r1(mm.p),S.r1(mm.c),S.r1(mm.f),'']);meta.push('mtotal');
+      aoa.push(['','','','','','','']);meta.push('gap');
+    });
+    aoa.push([t.total,'',S.r0(d.cal),S.r1(d.p),S.r1(d.c),S.r1(d.f),'']);meta.push('dtotal');
+    const sec=(title,id)=>{const v=document.getElementById(id).value.trim();if(!v)return;aoa.push(['','','','','','','']);meta.push('gap');aoa.push([title,'','','','','','']);meta.push('meal');merges.push({s:{r:aoa.length-1,c:0},e:{r:aoa.length-1,c:6}});v.split('\n').forEach(s=>{if(s.trim()){aoa.push([s,'','','','','','']);meta.push('note');merges.push({s:{r:aoa.length-1,c:0},e:{r:aoa.length-1,c:6}})}})};
+    sec(t.supps,'pb_supps');sec(t.peds,'pb_peds');sec(t.recipes,'pb_recipes');sec(t.notes,'pb_notes');
+    const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:28},{wch:12},{wch:9},{wch:9},{wch:9},{wch:9},{wch:34}];ws['!merges']=merges;
+    ws['!rows']=meta.map(m=>m==='title'?{hpt:34}:m==='meal'?{hpt:24}:{hpt:20});
+    const ta=en?'left':'right';
+    meta.forEach((mt,r)=>{for(let c=0;c<7;c++){const a=XLSX.utils.encode_cell({r,c});
+      if(mt==='title')pbStyle(ws,a,{fill:teal,font:{bold:true,sz:16,color:{rgb:'06201D'}},align:{horizontal:'center'}});
+      else if(mt==='sub')pbStyle(ws,a,{fill:dark2,font:{bold:true,sz:11,color:{rgb:white}},align:{horizontal:ta}});
+      else if(mt==='meal')pbStyle(ws,a,{fill:dark2,font:{bold:true,sz:13,color:{rgb:teal}},align:{horizontal:ta},border:bAll});
+      else if(mt==='thead')pbStyle(ws,a,{fill:'1B222B',font:{bold:true,sz:10,color:{rgb:mut}},align:{horizontal:'center'},border:bAll});
+      else if(mt==='data')pbStyle(ws,a,{fill:dark,font:{sz:11,color:{rgb:white},bold:c===0},align:{horizontal:c===0||c===6?ta:'center'},border:bAll});
+      else if(mt==='mtotal')pbStyle(ws,a,{fill:'132420',font:{bold:true,sz:11,color:{rgb:teal}},align:{horizontal:c===0?ta:'center'},border:bAll});
+      else if(mt==='dtotal')pbStyle(ws,a,{fill:teal,font:{bold:true,sz:13,color:{rgb:'06201D'}},align:{horizontal:c===0?ta:'center'},border:bAll});
+      else if(mt==='note')pbStyle(ws,a,{fill:dark,font:{sz:11,color:{rgb:white}},align:{horizontal:ta}});
+    }});
+    XLSX.utils.book_append_sheet(wb,ws,'Diet Plan');XLSX.writeFile(wb,'AhmedSaeed-Diet-'+(name||'plan')+'.xlsx');pbToast('تم تصدير Excel');
+  }else{
+    if(!days.some(d=>d.exercises.some(e=>e.name))){pbToast('ضيف تمارين الأول',true);return}
+    const name=document.getElementById('pb_wClientName').value.trim();
+    const aoa=[],merges=[],meta=[];
+    aoa.push(['Ahmed Saeed Coaching — '+t.workout,'','','','','','','']);meta.push('title');merges.push({s:{r:0,c:0},e:{r:0,c:7}});
+    let split=document.getElementById('pb_wSplit').value;if(split==='__custom__')split=document.getElementById('pb_wSplitCustom').value.trim();
+    aoa.push([(name||'—'),'',t.split+': '+(split||'—'),'','','','','']);meta.push('sub');merges.push({s:{r:1,c:0},e:{r:1,c:1}});merges.push({s:{r:1,c:2},e:{r:1,c:7}});
+    aoa.push(['','','','','','','','']);meta.push('gap');
+    const exLinks=[]; // {r, c, url, name}
+    days.forEach(d=>{
+      aoa.push([d.name+(d.focus?'  ('+d.focus+')':''),'','','','','','','']);meta.push('meal');merges.push({s:{r:aoa.length-1,c:0},e:{r:aoa.length-1,c:7}});
+      // two extra columns (Weight / Reps done) are BLANK on export — the client fills them in
+      aoa.push(['#',en?'Exercise':'اسم التمرين',t.sets,t.reps,'RIR','Weight(kg)','Reps',en?'Notes':'ملاحظات']);meta.push('thead');
+      let i=0;d.exercises.forEach(e=>{if(!e.name)return;i++;const rowIdx=aoa.length;aoa.push([i,e.name,e.sets||'—',e.reps||'—',e.rir||'—','','',e.note||'']);meta.push('data');if(e.link)exLinks.push({r:rowIdx,c:1,url:e.link,name:e.name});});
+      aoa.push(['','','','','','','','']);meta.push('gap');
+    });
+    const wn=document.getElementById('pb_wNotes').value.trim();
+    if(wn){aoa.push([t.wnotes,'','','','','','','']);meta.push('meal');merges.push({s:{r:aoa.length-1,c:0},e:{r:aoa.length-1,c:7}});wn.split('\n').forEach(s=>{if(s.trim()){aoa.push([s,'','','','','','','']);meta.push('note');merges.push({s:{r:aoa.length-1,c:0},e:{r:aoa.length-1,c:7}})}})}
+    const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:5},{wch:38},{wch:8},{wch:10},{wch:6},{wch:11},{wch:8},{wch:26}];ws['!merges']=merges;
+    ws['!rows']=meta.map(m=>m==='title'?{hpt:34}:m==='meal'?{hpt:24}:{hpt:20});
+    const ta=en?'left':'right';
+    meta.forEach((mt,r)=>{for(let c=0;c<8;c++){const a=XLSX.utils.encode_cell({r,c});
+      if(mt==='title')pbStyle(ws,a,{fill:teal,font:{bold:true,sz:16,color:{rgb:'06201D'}},align:{horizontal:'center'}});
+      else if(mt==='sub')pbStyle(ws,a,{fill:dark2,font:{bold:true,sz:11,color:{rgb:white}},align:{horizontal:ta}});
+      else if(mt==='meal')pbStyle(ws,a,{fill:dark2,font:{bold:true,sz:13,color:{rgb:teal}},align:{horizontal:ta},border:bAll});
+      else if(mt==='thead')pbStyle(ws,a,{fill:'1B222B',font:{bold:true,sz:10,color:{rgb:(c===5||c===6)?teal:mut}},align:{horizontal:'center'},border:bAll});
+      else if(mt==='data')pbStyle(ws,a,{fill:(c===5||c===6)?'12201E':dark,font:{sz:11,color:{rgb:c===4?gold:white},bold:c===1},align:{horizontal:c===1||c===7?ta:'center'},border:bAll});
+      else if(mt==='note')pbStyle(ws,a,{fill:dark,font:{sz:11,color:{rgb:white}},align:{horizontal:ta}});
+    }});
+    // make exercise names clickable links (name shows, click opens video)
+    exLinks.forEach(({r,c,url})=>{
+      const a=XLSX.utils.encode_cell({r,c});
+      if(ws[a]){ws[a].l={Target:url,Tooltip:'افتح الفيديو'};
+        ws[a].s=Object.assign({},ws[a].s,{font:{sz:11,bold:true,color:{rgb:'4FD1C5'},underline:true},alignment:{horizontal:ta,vertical:'center'},fill:{patternType:'solid',fgColor:{rgb:dark}},border:bAll});}
+    });
+    XLSX.utils.book_append_sheet(wb,ws,'Workout Plan');XLSX.writeFile(wb,'AhmedSaeed-Workout-'+(name||'plan')+'.xlsx');pbToast('تم تصدير Excel');
+  }
+};
+
+
+/* ---------- INIT (once) ---------- */
+window.pbInit=function(){
+  if(window._pbInited)return;window._pbInited=true;
+  // lang segment
+  document.querySelectorAll('#pbLang button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('#pbLang button').forEach(x=>x.classList.remove('active'));b.classList.add('active');lang=b.dataset.lang;
+  });
+  meals=[];mSeq=0;iSeq=0;
+  pbAddMeal();pbAddMeal();pbAddMeal();
+  days=[];dSeq=0;exSeq=0;
+  pbAddDay();pbAddDay();
+};
+
+// expose state for exports
+window._pbState=()=>({meals,days,lang,FIDX,FOODS,SEED_FOODS,CUSTOM,SAVED_EX,dayMacros,mealMacros,itemMacros,r0,r1});
+
+/* Standalone print-ready HTML document for the CURRENT tab.
+   Self-contained: fonts + PDF_CSS + A4 page rules inline. This is exactly what
+   gets sent to the server PDF renderer (and is handy for testing). */
+window.pbBuildPDFDoc=function(){
+  let html,fname;
+  if(pbTab==='diet'){
+    if(!meals.some(m=>m.items.some(i=>i.food))) return null;
+    html=buildDietPDFHtml();fname='AhmedSaeed-Diet-'+(document.getElementById('pb_clientName').value.trim()||'plan');
+  }else{
+    if(!days.some(d=>d.exercises.some(e=>e.name))) return null;
+    html=buildWorkoutPDFHtml();fname='AhmedSaeed-Workout-'+(document.getElementById('pb_wClientName').value.trim()||'plan');
+  }
+  const fonts='<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">';
+  const pageCss='@page{size:A4;margin:0}'
+    +'html,body{margin:0;padding:0;background:#0A0C0F;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'#pbpdf{width:794px !important;max-width:794px !important;margin:0 auto !important}'
+    +'#pbpdf .pp{width:794px !important;min-height:1123px;padding:14mm 12mm !important;box-sizing:border-box !important;page-break-after:always;break-after:page}'
+    +'#pbpdf .pp:last-child{page-break-after:auto;break-after:auto}'
+    +'#pbpdf .pp.ppcover{min-height:1123px;display:flex;flex-direction:column;justify-content:center}';
+  const doc='<!DOCTYPE html><html lang="'+(lang==='en'?'en':'ar')+'"><head><meta charset="UTF-8">'
+    +fonts+'<style>'+PDF_CSS+pageCss+'</style></head><body>'+html+'</body></html>';
+  return {doc:doc, fname:fname};
+};
+
+/* Server-side export: POST the HTML, receive a real PDF, download it.
+   Works on iOS because the browser only downloads a finished file — it never
+   runs the print pipeline. Requires PB_PDF_ENDPOINT to be set. */
+window.PB_PDF_ENDPOINT='/api/pdf'; // same Vercel project → same origin
+window.pbPDFServer=async function(){
+  const built=window.pbBuildPDFDoc();
+  if(!built){ pbToast(pbTab==='diet'?'ضيف أصناف الأول':'ضيف تمارين الأول',true); return; }
+  if(!window.PB_PDF_ENDPOINT){ pbToast('لسه ماتظبطش سيرفر الـ PDF',true); return; }
+  const btn=document.getElementById('pbServerBtn'); const label=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='⏳ بيجهّز على السيرفر…';}
+  try{
+    const r=await fetch(window.PB_PDF_ENDPOINT,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({html:built.doc, filename:built.fname})
+    });
+    if(!r.ok){ let m=r.status; try{m=(await r.json()).error||m;}catch(e){} throw new Error(m); }
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    // iOS-friendly: open the finished PDF; user taps Share -> Save to Files
+    const a=document.createElement('a'); a.href=url; a.download=built.fname+'.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    pbToast('تم تجهيز الـ PDF ✅');
+  }catch(e){ pbToast('فشل السيرفر — '+errMsg(e),true); }
+  finally{ if(btn){btn.disabled=false;btn.textContent=label;} }
+};
+
+/* ============================================================
+   SAVED PROGRAMS — store diet/workout builds in Supabase,
+   reopen + edit + re-export later. Full archive (nothing auto-deleted).
+   ============================================================ */
+// per-tab editing id so diet and workout are saved as SEPARATE programs
+let pbEditing={diet:null, workout:null};
+let pbEditingNames={diet:'', workout:''};
+function pbCurEditId(){return pbEditing[pbTab]||null;}
+
+const DIET_FIELDS=['pb_clientName','pb_goal','pb_weight','pb_height','pb_duration','pb_tCal','pb_tPro','pb_tCarb','pb_tFat','pb_supps','pb_peds','pb_recipes','pb_notes'];
+const WORKOUT_FIELDS=['pb_wClientName','pb_wSplit','pb_wSplitCustom','pb_wGoal','pb_wDuration','pb_wNotes'];
+function pbGetField(id){const el=document.getElementById(id);return el?el.value:'';}
+function pbSetField(id,v){const el=document.getElementById(id);if(el)el.value=(v==null?'':v);}
+
+// serialize the CURRENT tab into a plain object
+function pbSerialize(){
+  if(pbTab==='diet'){
+    const f={}; DIET_FIELDS.forEach(id=>f[id]=pbGetField(id));
+    return {kind:'diet', fields:f, meals:JSON.parse(JSON.stringify(meals))};
+  }else{
+    const f={}; WORKOUT_FIELDS.forEach(id=>f[id]=pbGetField(id));
+    return {kind:'workout', fields:f, days:JSON.parse(JSON.stringify(days))};
+  }
+}
+// restore a saved object back into the builder
+function pbDeserialize(kind,data){
+  if(kind==='diet'){
+    pbSwitch('diet');
+    (data.fields?Object.keys(data.fields):[]).forEach(id=>pbSetField(id,data.fields[id]));
+    meals = Array.isArray(data.meals)&&data.meals.length ? data.meals : [newMeal()];
+    // rebuild sequence counters so new adds don't collide
+    mSeq=Math.max(0,...meals.map(m=>m.id||0)); iSeq=Math.max(0,...meals.flatMap(m=>(m.items||[]).map(i=>i.id||0))); aSeq=Math.max(0,...meals.flatMap(m=>(m.items||[]).flatMap(i=>(i.alts||[]).map(a=>a.id||0))));
+    pbRenderDiet();
+  }else{
+    pbSwitch('workout');
+    (data.fields?Object.keys(data.fields):[]).forEach(id=>pbSetField(id,data.fields[id]));
+    if(data.fields&&data.fields.pb_wSplit==='__custom__')pbSplitChange('__custom__');
+    days = Array.isArray(data.days)&&data.days.length ? data.days : [newDay()];
+    dSeq=Math.max(0,...days.map(d=>d.id||0)); exSeq=Math.max(0,...days.flatMap(d=>(d.exercises||[]).map(e=>e.id||0)));
+    pbRenderWorkout();
+  }
+}
+function pbProgramTitle(){
+  const name = pbTab==='diet' ? pbGetField('pb_clientName') : pbGetField('pb_wClientName');
+  return (name||'').trim();
+}
+// SAVE (create or update)
+window.pbSaveProgram=async function(){
+  if(!sb){pbToast('محتاج اتصال بالسيرفر',true);return;}
+  // must have some content
+  const hasContent = pbTab==='diet' ? meals.some(m=>m.items.some(i=>i.food)) : days.some(d=>d.exercises.some(e=>e.name));
+  if(!hasContent){pbToast(pbTab==='diet'?'ضيف أصناف الأول':'ضيف تمارين الأول',true);return;}
+  let title=pbProgramTitle();
+  if(!title){ title=prompt('اكتب اسم للبرنامج (مثلاً اسم العميل):','')||''; title=title.trim(); if(!title){pbToast('لازم اسم للبرنامج',true);return;} 
+    // put the typed name back into the right field
+    pbSetField(pbTab==='diet'?'pb_clientName':'pb_wClientName',title);
+  }
+  const savingTab=pbTab; // lock the tab we're saving (avoid races if user switches)
+  const payload={kind:savingTab, title, data:pbSerialize()};
+  try{
+    const editId=pbEditing[savingTab];
+    if(editId){
+      const {error}=await sb.from('programs').update(payload).eq('id',editId);
+      if(error) throw error;
+      pbEditingNames[savingTab]=title;
+      pbToast('تم تحديث البرنامج ✅');
+    }else{
+      const {data,error}=await sb.from('programs').insert(payload).select('id').single();
+      if(error) throw error;
+      if(data&&data.id){ pbEditing[savingTab]=data.id; pbEditingNames[savingTab]=title; if(pbTab===savingTab) pbShowEditing(title); }
+      pbToast('تم حفظ البرنامج ✅');
+    }
+  }catch(e){ pbToast('فشل الحفظ — '+errMsg(e),true); }
+};
+function pbShowEditing(name){const bar=document.getElementById('pbEditingBar');if(bar){document.getElementById('pbEditingName').textContent=name;bar.style.display='block';}}
+function pbRefreshEditingBar(){ // called on tab switch to show the right bar for the current tab
+  const bar=document.getElementById('pbEditingBar');if(!bar)return;
+  if(pbEditing[pbTab]){ document.getElementById('pbEditingName').textContent=pbEditingNames[pbTab]||''; bar.style.display='block'; }
+  else{ bar.style.display='none'; }
+}
+window.pbClearEditing=function(){pbEditing[pbTab]=null;pbEditingNames[pbTab]='';const bar=document.getElementById('pbEditingBar');if(bar)bar.style.display='none';pbToast('ابدأ برنامج جديد — الحفظ هيعمل نسخة جديدة');};
+
+// SAVED LIST MODAL
+window.pbOpenSaved=async function(){
+  let modal=document.getElementById('pbSavedModal');
+  if(!modal){
+    modal=document.createElement('div');modal.id='pbSavedModal';modal.className='modal';modal.dir='rtl';
+    modal.innerHTML='<div class="modal-box" style="max-width:680px"><div class="modal-head"><h2>البرامج المحفوظة</h2><button class="modal-close" onclick="document.getElementById(\'pbSavedModal\').classList.remove(\'show\')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'
+      +'<div class="filter-tabs" id="pbSavedFilter" style="margin-bottom:14px"><button class="active" data-k="all">الكل</button><button data-k="diet">نظام غذائي</button><button data-k="workout">تمرين</button></div>'
+      +'<div id="pbSavedList" style="max-height:440px;overflow:auto"></div></div>';
+    document.body.appendChild(modal);
+    modal.querySelectorAll('#pbSavedFilter button').forEach(b=>b.onclick=()=>{modal.querySelectorAll('#pbSavedFilter button').forEach(x=>x.classList.remove('active'));b.classList.add('active');pbSavedKind=b.dataset.k;pbRenderSavedList();});
+  }
+  modal.classList.add('show');
+  document.getElementById('pbSavedList').innerHTML='<p class="pb-empty">بيحمّل…</p>';
+  await pbLoadSaved();
+};
+let PB_SAVED=[], pbSavedKind='all';
+async function pbLoadSaved(){
+  if(!sb){document.getElementById('pbSavedList').innerHTML='<p class="pb-empty">محتاج اتصال بالسيرفر</p>';return;}
+  try{
+    const {data,error}=await sb.from('programs').select('*').order('updated_at',{ascending:false});
+    if(error) throw error;
+    PB_SAVED=data||[]; pbRenderSavedList();
+  }catch(e){ document.getElementById('pbSavedList').innerHTML='<p class="pb-empty">فشل التحميل — '+esc(errMsg(e))+'</p>'; }
+}
+function pbRenderSavedList(){
+  const box=document.getElementById('pbSavedList');if(!box)return;
+  let list=PB_SAVED.filter(p=>pbSavedKind==='all'||p.kind===pbSavedKind);
+  if(!list.length){box.innerHTML='<p class="pb-empty">مفيش برامج محفوظة لسه.</p>';return;}
+  box.innerHTML='';
+  list.forEach(p=>{
+    const row=document.createElement('div');row.className='pb-fitem';row.style.gridTemplateColumns='1fr auto auto';
+    const kindLbl=p.kind==='diet'?'🍽️ نظام غذائي':'🏋️ تمرين';
+    const d=new Date(p.updated_at);const dstr=isNaN(d)?'':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    row.innerHTML='<div class="fn">'+esc(p.title)+'<div class="pb-fsrc">'+kindLbl+' · آخر تحديث '+dstr+'</div></div>';
+    const edit=document.createElement('button');edit.className='pb-alt-btn';edit.textContent='✏️ تعديل';
+    edit.onclick=()=>pbLoadProgram(p.id);
+    const del=document.createElement('button');del.className='pb-x';del.innerHTML=delSVG();
+    del.onclick=()=>pbDeleteProgram(p.id,p.title);
+    row.appendChild(edit);row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+window.pbLoadProgram=function(id){
+  const p=PB_SAVED.find(x=>x.id===id);if(!p)return;
+  try{
+    const data = typeof p.data==='string' ? JSON.parse(p.data) : p.data;
+    pbDeserialize(p.kind, data);   // this also switches to the right tab
+    pbEditing[p.kind]=p.id;        // mark THIS tab as editing this program
+    pbEditingNames[p.kind]=p.title;
+    pbShowEditing(p.title);
+    document.getElementById('pbSavedModal').classList.remove('show');
+    pbToast('اتفتح البرنامج — عدّل وبعدين احفظ أو صدّر');
+  }catch(e){ pbToast('فشل الفتح — '+errMsg(e),true); }
+};
+window.pbDeleteProgram=async function(id,title){
+  if(!confirm('حذف برنامج "'+(title||'')+'" نهائياً؟'))return;
+  try{
+    const {error}=await sb.from('programs').delete().eq('id',id);
+    if(error) throw error;
+    // if the deleted program was open in either tab, clear that tab's editing state
+    ['diet','workout'].forEach(k=>{ if(pbEditing[k]===id){ pbEditing[k]=null; if(pbTab===k){const bar=document.getElementById('pbEditingBar');if(bar)bar.style.display='none';} } });
+    PB_SAVED=PB_SAVED.filter(x=>x.id!==id); pbRenderSavedList();
+    pbToast('تم الحذف');
+  }catch(e){ pbToast('فشل الحذف — '+errMsg(e),true); }
+};
+})();
+
+
+/* ===== PROGRAMS view init hook ===== */
+document.querySelector('.nav-item[data-view="programs"]').addEventListener('click',()=>{
+  if(window.pbInit)window.pbInit();
+},{once:false});
+
+/* app boots via showApp() after a verified Supabase session */
+</script>
+</body>
+</html>

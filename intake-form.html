@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Assessment — Ahmed Saeed</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Tajawal:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0A0C0F;--surface:#141A20;--surface-2:#1A222B;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.14);
+  --ink:#EDF1F4;--ink-2:#AEB7C0;--ink-3:#6D7883;--accent:#4FD1C5;--accent-2:#7DE8DE;--danger:#E5646E;
+  --radius:16px;--ff-display:'Sora',sans-serif;--ff-body:'Inter',sans-serif;--ff-mono:'IBM Plex Mono',monospace;
+}
+html[dir="rtl"] body,html[dir="rtl"] .disp{font-family:'Tajawal',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
+body{max-width:100%;overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--ff-body);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+.disp{font-family:var(--ff-display)}
+.top{border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:0;background:rgba(10,12,15,.85);backdrop-filter:blur(14px);z-index:10}
+.wrap{max-width:720px;margin:0 auto;padding:0 22px}
+.top .wrap{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--ff-display);font-weight:700}
+.logo .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--accent),#0E3B37);color:#04201D;display:grid;place-items:center;font-weight:800}
+.lang-btn{font-family:var(--ff-mono);font-size:12px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:100px;padding:7px 13px;cursor:pointer;background:transparent}
+.container{padding:34px 0 80px}
+.progress{margin-bottom:34px}
+.pbar{height:6px;background:var(--surface-2);border-radius:100px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:20%;transition:.4s cubic-bezier(.6,.05,.15,1);border-radius:100px}
+.pmeta{display:flex;justify-content:space-between;margin-top:12px;font-family:var(--ff-mono);font-size:12px;color:var(--ink-3);letter-spacing:.05em}
+.pmeta .cur{color:var(--accent)}
+
+.step{display:none;animation:fade .45s ease}
+.step.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.step-head{margin-bottom:26px}
+.step-eyebrow{font-family:var(--ff-mono);font-size:11px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+.step-head h2{font-family:var(--ff-display);font-size:24px;font-weight:800}
+.step-head p{color:var(--ink-3);font-size:14px;margin-top:5px}
+
+.field{margin-bottom:18px}
+.field.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field label{display:block;font-size:13.5px;color:var(--ink-2);margin-bottom:8px;font-weight:500}
+.field label .req{color:var(--danger)}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:13px 15px;color:var(--ink);font-family:var(--ff-body);font-size:15px;transition:.2s}
+input:focus,select,textarea:focus{outline:none;border-color:var(--accent)}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236D7883' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 15px center}
+html[dir=rtl] select{background-position:left 15px center}
+textarea{resize:vertical;min-height:88px}
+
+.opts{display:grid;gap:10px}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{border:1px solid var(--line-2);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.2s;font-size:14.5px;display:flex;align-items:center;gap:11px}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:rgba(79,209,197,.07)}
+.opt .rd{width:18px;height:18px;border-radius:50%;border:2px solid var(--line-2);flex-shrink:0;transition:.2s}
+.opt.sel .rd{border-color:var(--accent);background:radial-gradient(circle,var(--accent) 40%,transparent 45%)}
+
+.uploads{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.up{border:1.5px dashed var(--line-2);border-radius:14px;padding:20px 10px;text-align:center;cursor:pointer;transition:.2s;position:relative;overflow:hidden;min-height:130px;display:flex;flex-direction:column;justify-content:center}
+.up:hover{border-color:var(--accent)}
+.up.has{border-style:solid;border-color:var(--accent)}
+.up svg{color:var(--ink-3);margin:0 auto 8px}
+.up .t{font-size:12.5px;color:var(--ink-2)}
+.up img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.up.has .lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(10,12,15,.8);font-size:11px;padding:4px;font-family:var(--ff-mono)}
+input[type=file]{display:none}
+
+.nav-btns{display:flex;gap:12px;margin-top:30px}
+.btn{padding:15px 26px;border-radius:100px;border:none;font-family:var(--ff-display);font-weight:600;font-size:15px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--accent);color:#04201D;flex:1}
+.btn-primary:hover{background:var(--accent-2)}
+.btn-ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line-2)}
+.btn-ghost:hover{border-color:var(--ink-2);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.overlay{position:fixed;inset:0;background:rgba(10,12,15,.96);backdrop-filter:blur(10px);z-index:100;display:none;place-items:center;text-align:center;padding:24px}
+.overlay.show{display:grid}
+.spinner{width:56px;height:56px;border:3px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.check{width:76px;height:76px;border-radius:50%;background:rgba(79,209,197,.12);display:grid;place-items:center;margin:0 auto 24px}
+.overlay h2{font-family:var(--ff-display);font-size:26px;font-weight:800;margin-bottom:10px}
+.overlay p{color:var(--ink-2);max-width:400px;margin:0 auto 24px}
+@media(max-width:560px){.field.row{grid-template-columns:1fr}.uploads{grid-template-columns:1fr}.opts.two{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="ui-system.css">
+</head>
+<body class="page-intake">
+<div class="top"><div class="wrap">
+  <a href="index.html" class="logo"><span class="mark">AS</span><span>Ahmed Saeed</span></a>
+  <button class="lang-btn" id="langBtn">العربية</button>
+</div></div>
+
+<div class="container"><div class="wrap">
+  <div class="progress">
+    <div class="pbar"><div class="pfill" id="pfill"></div></div>
+    <div class="pmeta"><span id="stepLabel">—</span><span><span class="cur" id="stepNum">1</span> / 5</span></div>
+  </div>
+
+  <!-- STEP 1: Personal -->
+  <div class="step active" data-step="1">
+    <div class="step-head"><div class="step-eyebrow" data-i18n="e1">Step 1 — Personal info</div><h2 class="disp" data-i18n="h1">Let's start with you</h2><p data-i18n="d1">Basic details so we can build around your body.</p></div>
+    <div class="field"><label data-i18n="l_name">Full name <span class="req">*</span></label><input id="f_name" type="text"></div>
+    <div class="field row">
+      <div><label data-i18n="l_age">Age <span class="req">*</span></label><input id="f_age" type="number" min="14" max="90"></div>
+      <div><label data-i18n="l_gender">Gender <span class="req">*</span></label><select id="f_gender"><option value="" data-i18n="opt_sel">Select…</option><option value="male" data-i18n="opt_m">Male</option><option value="female" data-i18n="opt_f">Female</option></select></div>
+    </div>
+    <div class="field row">
+      <div><label data-i18n="l_weight">Weight (kg) <span class="req">*</span></label><input id="f_weight" type="number" step="0.1"></div>
+      <div><label data-i18n="l_height">Height (cm) <span class="req">*</span></label><input id="f_height" type="number"></div>
+    </div>
+    <div class="field row">
+      <div><label data-i18n="l_phone">Phone / WhatsApp <span class="req">*</span></label><input id="f_phone" type="text"></div>
+      <div><label data-i18n="l_email">Email</label><input id="f_email" type="email"></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Training -->
+  <div class="step" data-step="2">
+    <div class="step-head"><div class="step-eyebrow" data-i18n="e2">Step 2 — Training</div><h2 class="disp" data-i18n="h2">Your goal & experience</h2><p data-i18n="d2">This shapes your whole program.</p></div>
+    <div class="field"><label data-i18n="l_goal">Primary goal <span class="req">*</span></label>
+      <div class="opts two" id="goalOpts">
+        <div class="opt" data-v="fat_loss"><span class="rd"></span><span data-i18n="goal_fl">Fat loss</span></div>
+        <div class="opt" data-v="muscle_gain"><span class="rd"></span><span data-i18n="goal_mg">Muscle gain</span></div>
+        <div class="opt" data-v="recomp"><span class="rd"></span><span data-i18n="goal_rc">Recomposition</span></div>
+        <div class="opt" data-v="contest"><span class="rd"></span><span data-i18n="goal_ct">Contest prep</span></div>
+      </div>
+    </div>
+    <div class="field"><label data-i18n="l_level">Training experience <span class="req">*</span></label>
+      <select id="f_level"><option value="" data-i18n="opt_sel">Select…</option>
+        <option value="beginner" data-i18n="lv_b">Beginner (0–1 yr)</option>
+        <option value="intermediate" data-i18n="lv_i">Intermediate (1–3 yrs)</option>
+        <option value="advanced" data-i18n="lv_a">Advanced (3+ yrs)</option>
+      </select>
+    </div>
+    <div class="field"><label data-i18n="l_days">Training days per week <span class="req">*</span></label>
+      <select id="f_days"><option value="" data-i18n="opt_sel">Select…</option>
+        <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+      </select>
+    </div>
+    <div class="field"><label data-i18n="l_sports">Other sports / activity (optional)</label><input id="f_sports" type="text"></div>
+  </div>
+
+  <!-- STEP 3: Nutrition -->
+  <div class="step" data-step="3">
+    <div class="step-head"><div class="step-eyebrow" data-i18n="e3">Step 3 — Nutrition</div><h2 class="disp" data-i18n="h3">Food & supplements</h2><p data-i18n="d3">So your plan fits how you actually eat.</p></div>
+    <div class="field"><label data-i18n="l_allergies">Food allergies (if any)</label><input id="f_allergies" type="text"></div>
+    <div class="field"><label data-i18n="l_fav">Favorite foods</label><input id="f_fav" type="text"></div>
+    <div class="field"><label data-i18n="l_dislike">Foods you dislike / avoid</label><input id="f_dislike" type="text"></div>
+    <div class="field"><label data-i18n="l_supp">Current supplements (optional)</label><textarea id="f_supp"></textarea></div>
+  </div>
+
+  <!-- STEP 4: Health -->
+  <div class="step" data-step="4">
+    <div class="step-head"><div class="step-eyebrow" data-i18n="e4">Step 4 — Health</div><h2 class="disp" data-i18n="h4">Medical background</h2><p data-i18n="d4">Important for safe, effective coaching.</p></div>
+    <div class="field"><label data-i18n="l_medical">Medical conditions (BP, diabetes, etc.)</label><textarea id="f_medical"></textarea></div>
+    <div class="field"><label data-i18n="l_curinj">Current injuries</label><input id="f_curinj" type="text"></div>
+    <div class="field"><label data-i18n="l_pastinj">Past injuries</label><input id="f_pastinj" type="text"></div>
+    <div class="field"><label data-i18n="l_meds">Current medications</label><input id="f_meds" type="text"></div>
+    <div class="field"><label data-i18n="l_notes">Anything else you'd like Ahmed to know</label><textarea id="f_notes"></textarea></div>
+  </div>
+
+  <!-- STEP 5: Photos -->
+  <div class="step" data-step="5">
+    <div class="step-head"><div class="step-eyebrow" data-i18n="e5">Step 5 — Photos</div><h2 class="disp" data-i18n="h5">Progress photos</h2><p data-i18n="d5">Front, side and back — used only to assess your physique.</p></div>
+    <div class="uploads">
+      <label class="up" for="ph_front" id="box_front"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><div class="t" data-i18n="ph_f">Front</div><span class="lbl"></span></label>
+      <label class="up" for="ph_side" id="box_side"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M8 21c0-4 2-6 4-6s4 2 4 6"/></svg><div class="t" data-i18n="ph_s">Side</div><span class="lbl"></span></label>
+      <label class="up" for="ph_back" id="box_back"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><div class="t" data-i18n="ph_b">Back</div><span class="lbl"></span></label>
+    </div>
+    <input type="file" id="ph_front" accept="image/*"><input type="file" id="ph_side" accept="image/*"><input type="file" id="ph_back" accept="image/*">
+    <p style="font-size:12px;color:var(--ink-3);margin-top:14px;text-align:center" data-i18n="ph_note">Your photos are private and used only by your coach.</p>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-ghost" id="backBtn" style="display:none" data-i18n="btn_back">Back</button>
+    <button class="btn btn-primary" id="nextBtn" data-i18n="btn_next">Continue</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="overlay">
+  <div id="ovLoad"><div class="spinner"></div><h2 data-i18n="ov_load">Saving your assessment…</h2><p data-i18n="ov_load_p">Uploading your details and photos.</p></div>
+  <div id="ovDone" style="display:none">
+    <div class="check"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h2 data-i18n="ov_done">You're all set! 🎉</h2>
+    <p data-i18n="ov_done_p">Ahmed has received your assessment. He'll reach out on WhatsApp shortly to start building your program.</p>
+    <a href="https://wa.me/201005569352?text=Hi%20Coach%20Ahmed%2C%20I%27m%20interested%20in%20training%20with%20you.%20Could%20you%20share%20more%20details%20about%20your%20coaching%20plans%3F" class="btn btn-primary" style="display:inline-flex;text-decoration:none" data-i18n="ov_wa">Message Ahmed on WhatsApp</a>
+  </div>
+</div>
+
+<script>
+const SURL="https://YOUR_PROJECT.supabase.co";
+const SKEY="YOUR_SUPABASE_ANON_KEY";
+let sb=null;try{if(SURL.indexOf("YOUR_PROJECT")<0)sb=supabase.createClient(SURL,SKEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});}catch(e){}
+
+/* ===== Safari-safe helpers (genId / storage wrappers / real errors / image compression) ===== */
+function genId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&0x3|0x8)).toString(16);});}
+function lsGet(k){try{return window.localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{window.localStorage.setItem(k,v)}catch(e){}}
+function errMsg(e){try{return (e&&(e.message||e.error_description||e.msg))||String(e)}catch(_){return 'unknown error'}}
+function compressImage(file,maxDim,quality){maxDim=maxDim||1600;quality=quality||0.82;
+  return new Promise((resolve)=>{ if(!file||!/^image\//.test(file.type)){resolve(file);return;}
+    const img=new Image(); const url=URL.createObjectURL(file);
+    img.onload=()=>{ URL.revokeObjectURL(url);
+      let w=img.width,h=img.height;
+      if(Math.max(w,h)>maxDim){const k=maxDim/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k);}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      c.toBlob(b=>{ resolve(b?new File([b],'photo.jpg',{type:'image/jpeg'}):file); },'image/jpeg',quality);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve(file);};
+    img.src=url;
+  });}
+const qs=new URLSearchParams(location.search);
+const SUB_ID=qs.get('sub')||null;
+let LANG=lsGet('as_lang')||'en';
+let step=1;const goal={v:null};
+
+const T={en:{
+  e1:"Step 1 — Personal info",h1:"Let's start with you",d1:"Basic details so we can build around your body.",
+  l_name:"Full name",l_age:"Age",l_gender:"Gender",l_weight:"Weight (kg)",l_height:"Height (cm)",l_phone:"Phone / WhatsApp",l_email:"Email",
+  opt_sel:"Select…",opt_m:"Male",opt_f:"Female",
+  e2:"Step 2 — Training",h2:"Your goal & experience",d2:"This shapes your whole program.",
+  l_goal:"Primary goal",goal_fl:"Fat loss",goal_mg:"Muscle gain",goal_rc:"Recomposition",goal_ct:"Contest prep",
+  l_level:"Training experience",lv_b:"Beginner (0–1 yr)",lv_i:"Intermediate (1–3 yrs)",lv_a:"Advanced (3+ yrs)",
+  l_days:"Training days per week",l_sports:"Other sports / activity (optional)",
+  e3:"Step 3 — Nutrition",h3:"Food & supplements",d3:"So your plan fits how you actually eat.",
+  l_allergies:"Food allergies (if any)",l_fav:"Favorite foods",l_dislike:"Foods you dislike / avoid",l_supp:"Current supplements (optional)",
+  e4:"Step 4 — Health",h4:"Medical background",d4:"Important for safe, effective coaching.",
+  l_medical:"Medical conditions (BP, diabetes, etc.)",l_curinj:"Current injuries",l_pastinj:"Past injuries",l_meds:"Current medications",l_notes:"Anything else you'd like Ahmed to know",
+  e5:"Step 5 — Photos",h5:"Progress photos",d5:"Front, side and back — used only to assess your physique.",
+  ph_f:"Front",ph_s:"Side",ph_b:"Back",ph_note:"Your photos are private and used only by your coach.",
+  btn_back:"Back",btn_next:"Continue",btn_submit:"Submit Assessment",
+  ov_load:"Saving your assessment…",ov_load_p:"Uploading your details and photos.",
+  ov_done:"You're all set! 🎉",ov_done_p:"Ahmed has received your assessment. He'll reach out on WhatsApp shortly to start building your program.",ov_wa:"Message Ahmed on WhatsApp",
+  labels:["Personal","Training","Nutrition","Health","Photos"],
+  err1:"Please fill all required fields in this step.",err_goal:"Please choose a goal.",err_photo:"Please upload at least your front photo."
+},ar:{
+  e1:"خطوة 1 — بياناتك",h1:"نبدأ بيك أنت",d1:"بيانات أساسية عشان نبني على جسمك.",
+  l_name:"الاسم الكامل",l_age:"السن",l_gender:"النوع",l_weight:"الوزن (كجم)",l_height:"الطول (سم)",l_phone:"الهاتف / واتساب",l_email:"الإيميل",
+  opt_sel:"اختار…",opt_m:"ذكر",opt_f:"أنثى",
+  e2:"خطوة 2 — التمرين",h2:"هدفك وخبرتك",d2:"ده اللي بيحدد شكل برنامجك كله.",
+  l_goal:"الهدف الأساسي",goal_fl:"خسارة دهون",goal_mg:"زيادة عضل",goal_rc:"إعادة تكوين",goal_ct:"تحضير بطولة",
+  l_level:"الخبرة التدريبية",lv_b:"مبتدئ (0–1 سنة)",lv_i:"متوسط (1–3 سنين)",lv_a:"متقدم (3+ سنين)",
+  l_days:"أيام التمرين في الأسبوع",l_sports:"رياضات / نشاط آخر (اختياري)",
+  e3:"خطوة 3 — التغذية",h3:"الأكل والمكملات",d3:"عشان الخطة تناسب أكلك فعلاً.",
+  l_allergies:"حساسية من أكل (إن وُجد)",l_fav:"الأكل المفضل",l_dislike:"أكل مش بتحبه / بتتجنبه",l_supp:"مكملات حالية (اختياري)",
+  e4:"خطوة 4 — الصحة",h4:"التاريخ الطبي",d4:"مهم لتدريب آمن وفعّال.",
+  l_medical:"حالات مرضية (ضغط، سكري، إلخ)",l_curinj:"إصابات حالية",l_pastinj:"إصابات سابقة",l_meds:"أدوية حالية",l_notes:"أي حاجة تحب الكابتن يعرفها",
+  e5:"خطوة 5 — الصور",h5:"صور المتابعة",d5:"أمام، جنب، وخلف — بتُستخدم فقط لتقييم جسمك.",
+  ph_f:"أمام",ph_s:"جنب",ph_b:"خلف",ph_note:"صورك خاصة وبتُستخدم فقط من الكابتن.",
+  btn_back:"رجوع",btn_next:"متابعة",btn_submit:"إرسال التقييم",
+  ov_load:"جاري حفظ تقييمك…",ov_load_p:"بنرفع بياناتك وصورك.",
+  ov_done:"تمام كده! 🎉",ov_done_p:"الكابتن أحمد استلم تقييمك. هيكلمك على الواتساب قريب عشان يبدأ يبني برنامجك.",ov_wa:"كلّم الكابتن على الواتساب",
+  labels:["بياناتك","التمرين","التغذية","الصحة","الصور"],
+  err1:"من فضلك املأ كل الحقول المطلوبة في الخطوة دي.",err_goal:"من فضلك اختار هدف.",err_photo:"من فضلك ارفع صورة الأمام على الأقل."
+}};
+
+/* goal select */
+document.querySelectorAll('#goalOpts .opt').forEach(o=>o.onclick=()=>{
+  document.querySelectorAll('#goalOpts .opt').forEach(x=>x.classList.remove('sel'));
+  o.classList.add('sel');goal.v=o.dataset.v;
+});
+
+/* photos */
+const photos={front:null,side:null,back:null};
+const photosReady={front:null,side:null,back:null}; // compression starts on selection
+['front','side','back'].forEach(k=>{
+  document.getElementById('ph_'+k).onchange=e=>{
+    photos[k]=e.target.files[0];
+    photosReady[k]=photos[k]?compressImage(photos[k]):null;
+    const box=document.getElementById('box_'+k);
+    if(photos[k]){box.classList.add('has');const url=URL.createObjectURL(photos[k]);
+      box.querySelector('svg').style.display='none';box.querySelector('.t').style.display='none';
+      let img=box.querySelector('img');if(!img){img=document.createElement('img');box.appendChild(img);}img.src=url;}
+  };
+});
+
+/* navigation */
+function updateUI(){
+  document.querySelectorAll('.step').forEach(s=>s.classList.toggle('active',+s.dataset.step===step));
+  document.getElementById('pfill').style.width=(step*20)+'%';
+  document.getElementById('stepNum').textContent=step;
+  document.getElementById('stepLabel').textContent=T[LANG].labels[step-1];
+  document.getElementById('backBtn').style.display=step>1?'flex':'none';
+  const nb=document.getElementById('nextBtn');
+  nb.textContent=step===5?T[LANG].btn_submit:T[LANG].btn_next;
+}
+function validate(){
+  if(step===1){for(const id of ['f_name','f_age','f_gender','f_weight','f_height','f_phone']){if(!document.getElementById(id).value.trim()){alert(T[LANG].err1);return false;}}}
+  if(step===2){if(!goal.v){alert(T[LANG].err_goal);return false;}if(!document.getElementById('f_level').value||!document.getElementById('f_days').value){alert(T[LANG].err1);return false;}}
+  if(step===5){if(!photos.front){alert(T[LANG].err_photo);return false;}}
+  return true;
+}
+document.getElementById('backBtn').onclick=()=>{if(step>1){step--;updateUI();window.scrollTo(0,0);}};
+document.getElementById('nextBtn').onclick=()=>{
+  if(!validate())return;
+  if(step<5){step++;updateUI();window.scrollTo(0,0);}else submit();
+};
+
+async function submit(){
+  const nb=document.getElementById('nextBtn');
+  const nbHTML=nb.innerHTML; nb.disabled=true; nb.innerHTML=LANG==='ar'?'⏳ جاري الإرسال…':'⏳ Sending…';
+  const ov=document.getElementById('overlay');ov.classList.add('show');
+  document.getElementById('ovLoad').style.display='block';document.getElementById('ovDone').style.display='none';
+  const g=v=>document.getElementById(v).value.trim();
+  try{
+    let urls={front:null,side:null,back:null};
+    if(sb){
+      for(const k of ['front','side','back']){
+        if(photos[k]){const fn=k+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.jpg';
+          // upload the pre-compressed file (Safari-safe: real File + explicit contentType)
+          const fileToSend = photosReady[k] ? await photosReady[k] : photos[k];
+          const {error}=await sb.storage.from('client-photos').upload(fn,fileToSend,{contentType:'image/jpeg'});
+          // private bucket → keep the path only; the coach views it via a signed URL
+          if(error) throw error;
+          urls[k]=fn;}
+      }
+      // generate the id here because anon can INSERT but not read clients back
+      const clientId=genId();
+      const payload={
+        id:clientId,
+        status:'new',full_name:g('f_name'),age:parseInt(g('f_age'))||null,gender:g('f_gender'),
+        weight:parseFloat(g('f_weight'))||null,height:parseFloat(g('f_height'))||null,phone:g('f_phone'),email:g('f_email'),
+        goal:goal.v,fitness_level:g('f_level'),training_days:g('f_days'),other_sports:g('f_sports'),
+        allergies:g('f_allergies'),favorite_foods:g('f_fav'),disliked_foods:g('f_dislike'),supplements:g('f_supp'),
+        medical_conditions:g('f_medical'),current_injuries:g('f_curinj'),past_injuries:g('f_pastinj'),medications:g('f_meds'),notes:g('f_notes'),
+        photo_front_url:urls.front,photo_side_url:urls.side,photo_back_url:urls.back,language:LANG
+      };
+      const {error:insErr}=await sb.from('clients').insert(payload);
+      if(insErr) throw insErr;
+      // link to the subscription through a locked server function
+      if(clientId&&SUB_ID){
+        try{ await sb.rpc('link_client_to_subscription',{p_sub_id:SUB_ID,p_client_id:clientId}); }catch(e){}
+      }
+    }
+    document.getElementById('ovLoad').style.display='none';document.getElementById('ovDone').style.display='block';
+  }catch(e){
+    // real failure → show the real reason and let the client retry (no fake success)
+    ov.classList.remove('show');
+    nb.disabled=false; nb.innerHTML=nbHTML;
+    alert((LANG==='ar'?'حصلت مشكلة أثناء الإرسال — جرّب تاني.':'Something went wrong — please try again.')+'\n\n'+errMsg(e));
+  }
+}
+
+/* lang */
+function applyLang(){
+  document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
+  document.getElementById('langBtn').textContent=LANG==='ar'?'EN':'العربية';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(T[LANG][k]!=null)el.textContent=T[LANG][k];});
+  updateUI();
+}
+document.getElementById('langBtn').onclick=()=>{LANG=LANG==='ar'?'en':'ar';lsSet('as_lang',LANG);applyLang();};
+
+/* prefill from payment redirect */
+if(qs.get('name'))document.getElementById('f_name').value=qs.get('name');
+if(qs.get('wa'))document.getElementById('f_phone').value=qs.get('wa');
+applyLang();
+</script>
+<!-- Vercel Web Analytics -->
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

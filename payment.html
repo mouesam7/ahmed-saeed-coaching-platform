@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Your Subscription — Ahmed Saeed</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Tajawal:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0A0C0F;--surface:#141A20;--surface-2:#1A222B;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.14);
+  --ink:#EDF1F4;--ink-2:#AEB7C0;--ink-3:#6D7883;--accent:#4FD1C5;--accent-2:#7DE8DE;--danger:#E5646E;--ok:#4FD1C5;
+  --radius:18px;--ff-display:'Sora',sans-serif;--ff-body:'Inter',sans-serif;--ff-mono:'IBM Plex Mono',monospace;
+}
+html[dir="rtl"] body,html[dir="rtl"] .disp{font-family:'Tajawal',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
+body{max-width:100%;overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--ff-body);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+.disp{font-family:var(--ff-display)}
+a{color:var(--accent);text-decoration:none}
+.top{border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:0;background:rgba(10,12,15,.85);backdrop-filter:blur(14px);z-index:10}
+.wrap{max-width:900px;margin:0 auto;padding:0 22px}
+.top .wrap{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--ff-display);font-weight:700}
+.logo .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--accent),#0E3B37);color:#04201D;display:grid;place-items:center;font-weight:800}
+.lang-btn{font-family:var(--ff-mono);font-size:12px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:100px;padding:7px 13px;cursor:pointer;background:transparent}
+.container{padding:40px 0 80px}
+.grid{display:grid;grid-template-columns:1fr 1.2fr;gap:28px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px}
+.summary .plan-badge{display:inline-block;font-family:var(--ff-mono);font-size:11px;letter-spacing:.1em;color:var(--accent);border:1px solid var(--line-2);border-radius:100px;padding:5px 12px;margin-bottom:16px}
+.summary h1{font-family:var(--ff-display);font-size:26px;font-weight:800;margin-bottom:6px}
+.summary .sub{color:var(--ink-3);font-size:14px;margin-bottom:24px}
+.line{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+.line span:first-child{color:var(--ink-2)}
+.line.total{border-bottom:none;padding-top:18px}
+.line.total span{font-family:var(--ff-display);font-size:24px;font-weight:800}
+.line.total span:first-child{font-size:15px;color:var(--ink-2);font-weight:400;align-self:center}
+.orig{text-decoration:line-through;color:var(--ink-3);font-size:15px;margin-inline-end:8px}
+.disc-row{margin:18px 0}
+.disc-row label{font-size:13px;color:var(--ink-2);display:block;margin-bottom:8px;font-family:var(--ff-mono);letter-spacing:.03em}
+.disc-input{display:flex;gap:8px}
+.disc-input input{flex:1;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;color:var(--ink);font-family:var(--ff-mono);font-size:14px;text-transform:uppercase}
+.disc-input input:focus{outline:none;border-color:var(--accent)}
+.disc-input button{background:var(--surface-2);border:1px solid var(--line-2);color:var(--ink);border-radius:12px;padding:0 18px;cursor:pointer;font-family:var(--ff-display);font-weight:600;font-size:14px;transition:.2s}
+.disc-input button:hover{border-color:var(--accent);color:var(--accent)}
+.disc-msg{font-size:13px;margin-top:8px;min-height:18px}
+.disc-msg.ok{color:var(--ok)}.disc-msg.err{color:var(--danger)}
+
+h2.step{font-family:var(--ff-display);font-size:18px;font-weight:700;margin-bottom:6px}
+.step-desc{color:var(--ink-3);font-size:13.5px;margin-bottom:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;color:var(--ink-2);margin-bottom:7px;font-weight:500}
+.field input{width:100%;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:13px 15px;color:var(--ink);font-family:var(--ff-body);font-size:15px}
+.field input:focus{outline:none;border-color:var(--accent)}
+
+.pay-methods{margin:22px 0}
+.pm{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.pm-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.pm-head .ic{width:34px;height:34px;border-radius:9px;background:rgba(79,209,197,.1);display:grid;place-items:center;color:var(--accent);flex-shrink:0}
+.pm-head .t{font-family:var(--ff-display);font-weight:600;font-size:15px}
+.pm .val{font-family:var(--ff-mono);font-size:14px;color:var(--ink);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--line)}
+.pm .val:first-of-type{border-top:none;padding-top:8px}
+.pm .val .k{color:var(--ink-3);font-size:12px;min-width:96px;flex-shrink:0}
+.pm .val .vv{flex:1;word-break:break-all;min-width:0}
+.pm .val .copy{margin-inline-start:auto}
+.copy{cursor:pointer;color:var(--accent);border:1px solid var(--line-2);border-radius:8px;padding:3px 9px;font-size:11px;font-family:var(--ff-mono);transition:.2s}
+.copy:hover{background:var(--accent);color:#04201D}
+.pm .sub{font-size:12px;color:var(--ink-3);margin-top:6px;font-family:var(--ff-body)}
+
+.upload{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1.5px dashed var(--line-2);border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:8px}
+.upload:hover{border-color:var(--accent);background:rgba(79,209,197,.03)}
+.upload svg{color:var(--ink-3);margin-bottom:8px}
+.upload .t{font-size:14px;color:var(--ink-2)}
+.upload .s{font-size:12px;color:var(--ink-3);margin-top:4px}
+.upload.has{border-color:var(--accent);border-style:solid}
+.upload.has .t{color:var(--accent)}
+input[type=file]{display:none}
+
+.btn{width:100%;padding:16px;border-radius:100px;border:none;background:var(--accent);color:#04201D;font-family:var(--ff-display);font-weight:700;font-size:16px;cursor:pointer;transition:.2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn:hover{background:var(--accent-2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.note{font-size:12px;color:var(--ink-3);text-align:center;margin-top:14px}
+
+/* overlay */
+.overlay{position:fixed;inset:0;background:rgba(10,12,15,.96);backdrop-filter:blur(10px);z-index:100;display:none;place-items:center;text-align:center;padding:24px}
+.overlay.show{display:grid}
+.spinner{width:56px;height:56px;border:3px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.check{width:76px;height:76px;border-radius:50%;background:rgba(79,209,197,.12);display:grid;place-items:center;margin:0 auto 24px}
+.overlay h2{font-family:var(--ff-display);font-size:26px;font-weight:800;margin-bottom:10px}
+.overlay p{color:var(--ink-2);max-width:380px;margin:0 auto}
+.count{font-family:var(--ff-display);font-size:56px;font-weight:800;color:var(--accent);margin-top:16px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="ui-system.css">
+</head>
+<body class="page-payment">
+<div class="top"><div class="wrap">
+  <a href="index.html" class="logo"><span class="mark">AS</span><span>Ahmed Saeed</span></a>
+  <button class="lang-btn" id="langBtn">العربية</button>
+</div></div>
+
+<div class="container"><div class="wrap"><div class="grid">
+  <!-- SUMMARY -->
+  <div class="card summary">
+    <span class="plan-badge" id="planBadge">PLAN</span>
+    <h1 class="disp" id="planName">—</h1>
+    <div class="sub" id="planDur">—</div>
+    <div class="line"><span data-i18n="s_plan">Plan</span><span id="sPlan">—</span></div>
+    <div class="line"><span data-i18n="s_dur">Duration</span><span id="sDur">—</span></div>
+    <div class="disc-row">
+      <label data-i18n="s_disc">Discount code (optional)</label>
+      <div class="disc-input">
+        <input type="text" id="discCode" placeholder="CODE">
+        <button id="applyDisc" data-i18n="s_apply">Apply</button>
+      </div>
+      <div class="disc-msg" id="discMsg"></div>
+    </div>
+    <div class="line total"><span data-i18n="s_total">Total</span><span><span class="orig" id="origPrice" style="display:none"></span><span id="finalPrice">—</span></span></div>
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="card">
+    <h2 class="step" data-i18n="p_h1">Complete your payment</h2>
+    <div class="step-desc" data-i18n="p_desc">Transfer the total using any method below, then upload your payment screenshot to confirm.</div>
+
+    <div class="field"><label data-i18n="f_name">Full name</label><input type="text" id="fName" placeholder="—"></div>
+    <div class="field"><label data-i18n="f_wa">WhatsApp number</label><input type="text" id="fWa" placeholder="+20…"></div>
+
+    <div class="pay-methods" id="payMethods"></div>
+
+    <label class="upload" id="uploadBox" for="proof">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <div class="t" data-i18n="u_t">Upload payment screenshot</div>
+      <div class="s" data-i18n="u_s">PNG or JPG · click to browse</div>
+    </label>
+    <input type="file" id="proof" accept="image/*">
+
+    <button class="btn" id="submitBtn" data-i18n="p_btn">Confirm Subscription</button>
+    <div class="note" data-i18n="p_note">After confirming, you'll fill a quick assessment form so your program can be built.</div>
+  </div>
+</div></div></div>
+
+<div class="overlay" id="overlay">
+  <div id="ovLoad">
+    <div class="spinner"></div>
+    <h2 data-i18n="ov_load">Submitting…</h2>
+    <p data-i18n="ov_load_p">Please wait while we confirm your payment.</p>
+  </div>
+  <div id="ovDone" style="display:none">
+    <div class="check"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h2 data-i18n="ov_done">Payment received!</h2>
+    <p data-i18n="ov_done_p">Redirecting you to the assessment form…</p>
+    <div class="count" id="count">3</div>
+  </div>
+</div>
+
+<script>
+const SURL="https://YOUR_PROJECT.supabase.co";
+const SKEY="YOUR_SUPABASE_ANON_KEY";
+let sb=null;try{if(SURL.indexOf("YOUR_PROJECT")<0)sb=supabase.createClient(SURL,SKEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});}catch(e){}
+
+/* ===== Safari-safe helpers (genId / storage wrappers / real errors / image compression) ===== */
+function genId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&0x3|0x8)).toString(16);});}
+function lsGet(k){try{return window.localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{window.localStorage.setItem(k,v)}catch(e){}}
+function errMsg(e){try{return (e&&(e.message||e.error_description||e.msg))||String(e)}catch(_){return 'unknown error'}}
+function compressImage(file,maxDim,quality){maxDim=maxDim||1600;quality=quality||0.82;
+  return new Promise((resolve)=>{ if(!file||!/^image\//.test(file.type)){resolve(file);return;}
+    const img=new Image(); const url=URL.createObjectURL(file);
+    img.onload=()=>{ URL.revokeObjectURL(url);
+      let w=img.width,h=img.height;
+      if(Math.max(w,h)>maxDim){const k=maxDim/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k);}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      c.toBlob(b=>{ resolve(b?new File([b],'photo.jpg',{type:'image/jpeg'}):file); },'image/jpeg',quality);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve(file);};
+    img.src=url;
+  });}
+
+const qs=new URLSearchParams(location.search);
+const REGION=qs.get('region')||'eg';
+const PLAN=qs.get('plan')||'pro';
+const MONTHS=parseInt(qs.get('months')||'6');
+const BASE=parseFloat(qs.get('price')||'0');
+const PLANNAME=qs.get('name')||PLAN;
+const SYM=REGION==='intl'?'$':'EGP';
+let LANG=lsGet('as_lang')||'en';
+let discountPct=0, finalPrice=BASE, appliedCode=null;
+
+const PAY={
+  eg:[
+    {t:"Vodafone Cash",icon:'phone',rows:[{k:"Wallet",v:"01005569352"}]},
+    {t:"InstaPay",icon:'card',rows:[{k:"Number",v:"01552937890"}]},
+    {t:"InstaPay Link",icon:'link',rows:[{k:"Link",v:"ipn.eg/S/iamahmedsaeed/instapay/7fYY2b",href:"https://ipn.eg/S/iamahmedsaeed/instapay/7fYY2b"}]}
+  ],
+  intl:[
+    {t:"PayPal",icon:'card',rows:[{k:"Email",v:"tapinfishy@gmail.com"}]},
+    {t:"Bank Transfer — ALEXBANK",icon:'bank',rows:[
+      {k:"Account holder",v:"Ahmed Saeed Abdelghani Mohamed Abdelraziq"},
+      {k:"Account number",v:"226002908001"},
+      {k:"IBAN",v:"EG160005202600000226002908001"},
+      {k:"SWIFT",v:"ALEXEGCXXXX"}
+    ]},
+    {t:"Western Union",icon:'globe',rows:[
+      {k:"Receiver",v:"Ahmed Saeed Abdelghani Mohamed Abdelraziq"},
+      {k:"Country",v:"Egypt",nocopy:true},
+      {k:"Currency",v:"USD",nocopy:true}
+    ]}
+  ]
+};
+
+const T={
+  en:{s_plan:"Plan",s_dur:"Duration",s_disc:"Discount code (optional)",s_apply:"Apply",s_total:"Total",
+    p_h1:"Complete your payment",p_desc:"Transfer the total using any method below, then upload your payment screenshot to confirm.",
+    f_name:"Full name",f_wa:"WhatsApp number",u_t:"Upload payment screenshot",u_s:"PNG or JPG · click to browse",
+    p_btn:"Confirm Subscription",p_note:"After confirming, you'll fill a quick assessment form so your program can be built.",
+    ov_load:"Submitting…",ov_load_p:"Please wait while we confirm your payment.",ov_done:"Payment received!",ov_done_p:"Redirecting you to the assessment form…",
+    months:"Months",disc_ok:"Discount applied!",disc_err:"Invalid or expired code",disc_plan:"This code isn't valid for this plan",
+    err_fields:"Please enter your name, WhatsApp and payment screenshot.",err_generic:"Something went wrong. Please try again or contact us on WhatsApp."},
+  ar:{s_plan:"الباقة",s_dur:"المدة",s_disc:"كود خصم (اختياري)",s_apply:"تطبيق",s_total:"الإجمالي",
+    p_h1:"أكمل الدفع",p_desc:"حوّل الإجمالي بأي طريقة تحت، وبعدها ارفع سكرين التحويل للتأكيد.",
+    f_name:"الاسم الكامل",f_wa:"رقم الواتساب",u_t:"ارفع سكرين الدفع",u_s:"PNG أو JPG · اضغط للاختيار",
+    p_btn:"تأكيد الاشتراك",p_note:"بعد التأكيد، هتملأ فورم تقييم سريع عشان نبني برنامجك.",
+    ov_load:"جاري الإرسال…",ov_load_p:"استنى شوية بنأكد دفعتك.",ov_done:"تم استلام الدفع!",ov_done_p:"بنحولك لفورم التقييم…",
+    months:"شهر",disc_ok:"تم تطبيق الخصم!",disc_err:"كود غير صالح أو منتهي",disc_plan:"الكود ده مش صالح للباقة دي",
+    err_fields:"من فضلك اكتب اسمك ورقم الواتساب وارفع سكرين الدفع.",err_generic:"حصل خطأ. حاول تاني أو كلمنا على الواتساب."}
+};
+
+function fmt(n){return Math.round(n).toLocaleString('en-US');}
+function priceStr(n){return REGION==='intl'?SYM+fmt(n):fmt(n)+' '+SYM;}
+
+function icon(name){
+  const p={phone:'<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/>',
+    card:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+    link:'<path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/>',
+    bank:'<path d="M3 21h18M5 21V10M19 21V10M3 10l9-6 9 6M9 21v-6h6v6"/>',
+    globe:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 010 20 15 15 0 010-20"/>'}[name];
+  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${p}</svg>`;
+}
+
+function renderPay(){
+  const box=document.getElementById('payMethods');
+  const cp=LANG==='ar'?'نسخ':'copy';
+  box.innerHTML=PAY[REGION].map(m=>`
+    <div class="pm">
+      <div class="pm-head"><span class="ic">${icon(m.icon)}</span><span class="t">${m.t}</span></div>
+      ${m.rows.map(r=>`
+        <div class="val">
+          <span class="k">${r.k}:</span>
+          <span class="vv">${r.href?`<a href="${r.href}" target="_blank">${r.v}</a>`:r.v}</span>
+          ${r.nocopy?'':`<span class="copy" data-c="${r.v}">${cp}</span>`}
+        </div>`).join('')}
+    </div>`).join('');
+  box.querySelectorAll('.copy').forEach(c=>c.onclick=()=>{navigator.clipboard.writeText(c.dataset.c);c.textContent=LANG==='ar'?'تم!':'copied!';setTimeout(()=>c.textContent=cp,1200);});
+}
+
+function renderSummary(){
+  document.getElementById('planBadge').textContent=REGION==='eg'?'🇪🇬 EGYPT':'🌍 INTERNATIONAL';
+  document.getElementById('planName').textContent=PLANNAME;
+  const durTxt=MONTHS+' '+T[LANG].months;
+  document.getElementById('planDur').textContent=durTxt;
+  document.getElementById('sPlan').textContent=PLANNAME;
+  document.getElementById('sDur').textContent=durTxt;
+  updateTotal();
+}
+function updateTotal(){
+  finalPrice=discountPct>0?BASE*(1-discountPct/100):BASE;
+  const orig=document.getElementById('origPrice');
+  if(discountPct>0){orig.style.display='inline';orig.textContent=priceStr(BASE);}else{orig.style.display='none';}
+  document.getElementById('finalPrice').textContent=priceStr(finalPrice);
+}
+
+/* discount */
+document.getElementById('applyDisc').onclick=async()=>{
+  const code=document.getElementById('discCode').value.trim().toUpperCase();
+  const msg=document.getElementById('discMsg');
+  if(!code)return;
+  if(!sb){msg.className='disc-msg err';msg.textContent=T[LANG].disc_err;return;}
+  const fail=(txt)=>{msg.className='disc-msg err';msg.textContent=txt;discountPct=0;appliedCode=null;updateTotal();};
+  try{
+    // Secure server-side validation. The codes table is NOT readable from the
+    // browser — this function returns only a yes/no plus the percentage.
+    const {data,error}=await sb.rpc('validate_discount',{p_code:code,p_region:REGION,p_plan:PLAN});
+    const row=Array.isArray(data)?data[0]:data;
+    if(error||!row||!row.valid){
+      fail(row&&row.reason==='wrong_plan'?T[LANG].disc_plan:T[LANG].disc_err);
+      return;
+    }
+    discountPct=row.discount_percent;appliedCode=code;
+    msg.className='disc-msg ok';msg.textContent=T[LANG].disc_ok+' −'+discountPct+'%';updateTotal();
+  }catch(e){fail(T[LANG].disc_err);}
+};
+
+/* file — compression starts the moment the file is chosen (promise stored) */
+let proofFile=null, proofReady=null;
+document.getElementById('proof').onchange=e=>{
+  proofFile=e.target.files[0];
+  proofReady=proofFile?compressImage(proofFile):null;
+  const box=document.getElementById('uploadBox');
+  if(proofFile){box.classList.add('has');box.querySelector('.t').textContent=proofFile.name;}
+};
+
+/* submit */
+document.getElementById('submitBtn').onclick=async()=>{
+  const name=document.getElementById('fName').value.trim();
+  const wa=document.getElementById('fWa').value.trim();
+  if(!name||!wa||!proofFile){alert(T[LANG].err_fields);return;}
+  const btn=document.getElementById('submitBtn');
+  const btnHTML=btn.innerHTML; btn.disabled=true; btn.innerHTML=LANG==='ar'?'⏳ جاري الإرسال…':'⏳ Sending…';
+  const ov=document.getElementById('overlay');ov.classList.add('show');
+  document.getElementById('ovLoad').style.display='block';document.getElementById('ovDone').style.display='none';
+  try{
+    let proofPath=null, subId=null;
+    if(sb){
+      const fn='pay_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.jpg';
+      // upload the pre-compressed file (Safari-safe: real File + explicit contentType)
+      const fileToSend = proofReady ? await proofReady : proofFile;
+      const {error:upErr}=await sb.storage.from('payment-proofs').upload(fn,fileToSend,{contentType:'image/jpeg'});
+      // private bucket → store the path, admin opens it via a signed URL
+      if(upErr) throw upErr;
+      proofPath=fn;
+      // We generate the id ourselves because anon can INSERT but not SELECT
+      // subscriptions back (that's the point of the security rules).
+      subId = genId();
+      const payload={
+        id:subId,
+        full_name:name,whatsapp:wa,plan:PLANNAME,duration_months:MONTHS,
+        amount_egp:finalPrice,currency:SYM,region:REGION,
+        discount_code:appliedCode,discount_percent:discountPct,
+        payment_screenshot_url:proofPath,status:'pending'
+      };
+      const {error:insErr}=await sb.from('subscriptions').insert(payload);
+      if(insErr) throw insErr;
+      // count the discount usage through a locked server function
+      if(appliedCode){
+        try{ await sb.rpc('increment_discount_use',{p_code:appliedCode}); }catch(e){}
+      }
+    }
+    // email notify (best effort)
+    try{
+      await fetch('https://formsubmit.co/ajax/iamahmedsaeed02@gmail.com',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({_subject:'New Subscription — '+PLANNAME,name,whatsapp:wa,plan:PLANNAME,months:MONTHS,total:priceStr(finalPrice),region:REGION})});
+    }catch(e){}
+    // done + countdown
+    document.getElementById('ovLoad').style.display='none';document.getElementById('ovDone').style.display='block';
+    let c=3;const cEl=document.getElementById('count');cEl.textContent=c;
+    const iv=setInterval(()=>{c--;if(c<=0){clearInterval(iv);
+      const u=new URLSearchParams({sub:subId||'',name,wa,region:REGION});
+      location.href='intake-form.html?'+u.toString();
+    }else cEl.textContent=c;},1000);
+  }catch(e){
+    ov.classList.remove('show');
+    btn.disabled=false; btn.innerHTML=btnHTML;
+    alert(T[LANG].err_generic+'\n\n'+errMsg(e));
+  }
+};
+
+/* lang */
+function applyLang(){
+  document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
+  document.getElementById('langBtn').textContent=LANG==='ar'?'EN':'العربية';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(T[LANG][k])el.textContent=T[LANG][k];});
+  renderSummary();renderPay();
+}
+document.getElementById('langBtn').onclick=()=>{LANG=LANG==='ar'?'en':'ar';lsSet('as_lang',LANG);applyLang();};
+
+/* prefill */
+if(qs.get('name')&&qs.get('cname'))document.getElementById('fName').value=qs.get('cname');
+applyLang();
+</script>
+<!-- Vercel Web Analytics -->
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
